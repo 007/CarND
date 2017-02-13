@@ -47,6 +47,8 @@ def get_data(recording_path):
             row['path'] = recording_path
             samples.append(row)
 
+def get_image(name):
+    return img_to_array(load_img(name))
 
 # how many outputs per input
 # each row * left/right/center * +/-
@@ -64,7 +66,7 @@ def generator(samples, batch_size=32, augment = False):
             for row in batch_samples:
 
                 name = row['path'] + row['center'].strip()
-                image = img_to_array(load_img(name))
+                image = get_image(name)
                 angle = float(row['steering'])
                 images.append(image)
                 angles.append(angle)
@@ -75,7 +77,7 @@ def generator(samples, batch_size=32, augment = False):
                     angles.append(-angle)
 
                     name = row['path'] + row['left'].strip()
-                    image = img_to_array(load_img(name))
+                    image = get_image(name)
                     angle = float(row['steering']) + AUGMENT_ANGLE
                     images.append(image)
                     angles.append(angle)
@@ -84,7 +86,7 @@ def generator(samples, batch_size=32, augment = False):
                     angles.append(-angle)
 
                     name = row['path'] + row['right'].strip()
-                    image = img_to_array(load_img(name))
+                    image = get_image(name)
                     angle = float(row['steering']) - AUGMENT_ANGLE
                     images.append(image)
                     angles.append(angle)
