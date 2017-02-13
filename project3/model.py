@@ -1,4 +1,4 @@
-BATCH_SIZE = 128
+BATCH_SIZE = 16
 
 # TF ordering, not TH ordering - all class docs seem to get this wrong?
 INPUT_SHAPE = (160,320,3)
