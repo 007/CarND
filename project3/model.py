@@ -20,25 +20,27 @@ samples = []
 def driving_model(input_shape):
     model = Sequential();
     # Crop - eliminate as much data as posible before other processing
-    model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=input_shape))
+    model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=input_shape, name='crop'))
     # Normalize
-    model.add(Lambda(lambda x: (x / 255.0) - 0.5))
+    model.add(Lambda(lambda x: (x / 255.0) - 0.5, name='normalize'))
 
     # Conv2D
-    model.add(Convolution2D(32, 3, 3))
-    model.add(MaxPooling2D())
-    model.add(Activation('relu'))
+    model.add(Convolution2D(32, 3, 3, name='conv_3x3'))
+    model.add(MaxPooling2D(name='max_pool'))
+    model.add(Activation('relu', name='activation_0'))
+
     model.add(Flatten())
 
-    model.add(Dense(128))
-    model.add(Activation('relu'))
+    model.add(Dense(64, name='fc_1'))
+    model.add(Activation('relu', name='activation_1'))
 
-    model.add(Dense(32))
-    model.add(Activation('softmax'))
+    model.add(Dense(32, name='fc_2'))
+    model.add(Activation('softmax', name='activation_2'))
 
-    model.add(Dense(1))
+    model.add(Dense(1, name='steering_prediction'))
 
     model.compile(optimizer='adam', loss='mean_squared_error')
+    model.summary()
     return model
 
 def get_data(recording_path):
