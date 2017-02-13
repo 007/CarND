@@ -33,7 +33,6 @@ def get_data(recording_path):
     with open(recording_path + 'driving_log.csv') as infile:
         for row in csv.DictReader(infile):
             row['path'] = recording_path
-            print(row)
             samples.append(row)
 
 
@@ -41,7 +40,7 @@ def get_data(recording_path):
 # each row * left/right/center * +/-
 GENERATOR_PERMUTATIONS = 1 * 3 * 2
 AUGMENT_ANGLE = 0.2
-def generator(samples, batch_size=32):
+def generator(samples, batch_size=32, augment = False):
     num_samples = len(samples)
     while 1: # Loop forever so the generator never terminates
         samples = sklearn.utils.shuffle(samples)
@@ -57,27 +56,29 @@ def generator(samples, batch_size=32):
                 angle = float(row['steering'])
                 images.append(image)
                 angles.append(angle)
-                image = np.fliplr(image)
-                images.append(image)
-                angles.append(-angle)
 
-                name = row['path'] + row['left'].strip()
-                image = img_to_array(load_img(name))
-                angle = float(row['steering']) + AUGMENT_ANGLE
-                images.append(image)
-                angles.append(angle)
-                image = np.fliplr(image)
-                images.append(image)
-                angles.append(-angle)
+                if augment:
+                    image = np.fliplr(image)
+                    images.append(image)
+                    angles.append(-angle)
 
-                name = row['path'] + row['right'].strip()
-                image = img_to_array(load_img(name))
-                angle = float(row['steering']) - AUGMENT_ANGLE
-                images.append(image)
-                angles.append(angle)
-                image = np.fliplr(image)
-                images.append(image)
-                angles.append(-angle)
+                    name = row['path'] + row['left'].strip()
+                    image = img_to_array(load_img(name))
+                    angle = float(row['steering']) + AUGMENT_ANGLE
+                    images.append(image)
+                    angles.append(angle)
+                    image = np.fliplr(image)
+                    images.append(image)
+                    angles.append(-angle)
+
+                    name = row['path'] + row['right'].strip()
+                    image = img_to_array(load_img(name))
+                    angle = float(row['steering']) - AUGMENT_ANGLE
+                    images.append(image)
+                    angles.append(angle)
+                    image = np.fliplr(image)
+                    images.append(image)
+                    angles.append(-angle)
 
             X_train = np.array(images)
             y_train = np.array(angles)
@@ -89,12 +90,12 @@ def train_model():
     train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 
     # compile and train the model using the generator function
-    train_generator = generator(train_samples, batch_size=BATCH_SIZE)
+    train_generator = generator(train_samples, batch_size=BATCH_SIZE, augment = True)
     validation_generator = generator(validation_samples, batch_size=BATCH_SIZE)
 
     train = driving_model(INPUT_SHAPE)
 
-    train.fit_generator(train_generator, samples_per_epoch=len(train_samples), nb_val_samples=len(validation_samples) * GENERATOR_PERMUTATIONS, validation_data=validation_generator, nb_epoch=3)
+    train.fit_generator(train_generator, samples_per_epoch=len(train_samples) * GENERATOR_PERMUTATIONS, nb_val_samples=len(validation_samples), validation_data=validation_generator, nb_epoch=3)
     train.save('model.h5')
 
 if __name__ == '__main__':
