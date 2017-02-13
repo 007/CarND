@@ -89,8 +89,8 @@ def train_model():
     train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 
     # compile and train the model using the generator function
-    train_generator = generator(train_samples, batch_size=32)
-    validation_generator = generator(validation_samples, batch_size=32)
+    train_generator = generator(train_samples, batch_size=BATCH_SIZE)
+    validation_generator = generator(validation_samples, batch_size=BATCH_SIZE)
 
     train = driving_model(INPUT_SHAPE)
 
