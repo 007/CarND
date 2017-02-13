@@ -7,8 +7,9 @@ INPUT_SHAPE = (160,320,3)
 import csv
 import numpy as np
 from keras.models import Sequential
-from keras.layers.core import Dense, Flatten, Lambda
-from keras.layers.convolutional import Cropping2D
+from keras.layers.core import Activation, Dense, Flatten, Lambda
+from keras.layers.convolutional import Cropping2D, Convolution2D
+from keras.layers.pooling import MaxPooling2D
 import sklearn
 from sklearn.model_selection import train_test_split
 from keras.preprocessing.image import load_img, img_to_array
@@ -22,8 +23,19 @@ def driving_model(input_shape):
     model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=input_shape))
     # Normalize
     model.add(Lambda(lambda x: (x / 255.0) - 0.5))
+
+    # Conv2D
+    model.add(Convolution2D(32, 3, 3))
+    model.add(MaxPooling2D())
+    model.add(Activation('relu'))
     model.add(Flatten())
-    # Simplest model
+
+    model.add(Dense(128))
+    model.add(Activation('relu'))
+
+    model.add(Dense(32))
+    model.add(Activation('softmax'))
+
     model.add(Dense(1))
 
     model.compile(optimizer='adam', loss='mean_squared_error')
