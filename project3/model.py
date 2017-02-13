@@ -1,7 +1,7 @@
 BATCH_SIZE = 16
 
 # TF ordering, not TH ordering - all class docs seem to get this wrong?
-INPUT_SHAPE = (160,320,3)
+INPUT_SHAPE = (160,320,1)
 
 # imports
 import csv
@@ -48,7 +48,7 @@ def get_data(recording_path):
             samples.append(row)
 
 def get_image(name):
-    return img_to_array(load_img(name))
+    return img_to_array(load_img(name, grayscale=True))
 
 # how many outputs per input
 # each row * left/right/center * +/-
