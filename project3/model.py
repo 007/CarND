@@ -8,7 +8,7 @@ import csv
 import numpy as np
 from keras.models import Sequential
 from keras.layers.core import Activation, Dense, Flatten, Lambda
-from keras.layers.convolutional import Cropping2D, Convolution2D
+from keras.layers.convolutional import Cropping2D, Convolution2D, UpSampling2D
 from keras.layers.pooling import MaxPooling2D
 import sklearn
 from sklearn.model_selection import train_test_split
@@ -21,6 +21,8 @@ def driving_model(input_shape):
     model = Sequential();
     # Crop - eliminate as much data as posible before other processing
     model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=input_shape, name='crop'))
+    # downsample
+    model.add(UpSampling2D(size=(0.5, 0.5), name='shrink'))
     # Normalize
     model.add(Lambda(lambda x: (x / 255.0) - 0.5, name='normalize'))
 
