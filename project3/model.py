@@ -1,4 +1,4 @@
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 
 # TF ordering, not TH ordering - all class docs seem to get this wrong?
 INPUT_SHAPE = (160,320,1)
@@ -9,7 +9,7 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers.core import Activation, Dense, Flatten, Lambda
 from keras.layers.convolutional import Cropping2D, Convolution2D, UpSampling2D
-from keras.layers.pooling import MaxPooling2D
+from keras.layers.pooling import AveragePooling2D, MaxPooling2D
 import sklearn
 from sklearn.model_selection import train_test_split
 from keras.preprocessing.image import load_img, img_to_array
@@ -22,7 +22,7 @@ def driving_model(input_shape):
     # Crop - eliminate as much data as posible before other processing
     model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=input_shape, name='crop'))
     # downsample
-    model.add(UpSampling2D(size=(0.5, 0.5), name='shrink'))
+    model.add(AveragePooling2D(pool_size=(2,2), name='shrink'))
     # Normalize
     model.add(Lambda(lambda x: (x / 255.0) - 0.5, name='normalize'))
 
