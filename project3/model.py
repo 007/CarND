@@ -6,12 +6,13 @@ INPUT_SHAPE = (160,320,1)
 # imports
 import csv
 import numpy as np
+import sklearn
+from sklearn.model_selection import train_test_split
+
 from keras.models import Sequential
 from keras.layers.core import Activation, Dense, Flatten, Lambda
 from keras.layers.convolutional import Cropping2D, Convolution2D, UpSampling2D
 from keras.layers.pooling import AveragePooling2D, MaxPooling2D
-import sklearn
-from sklearn.model_selection import train_test_split
 from keras.preprocessing.image import load_img, img_to_array
 
 samples = []
