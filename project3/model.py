@@ -1,7 +1,13 @@
 BATCH_SIZE = 32
+EPOCHS = 10
 
 # TF ordering, not TH ordering - all class docs seem to get this wrong?
 INPUT_SHAPE = (160,320,1)
+
+# how many outputs per input
+# each row * left/right/center * +/-
+GENERATOR_PERMUTATIONS = 1 * 3 * 2
+AUGMENT_ANGLE = 0.2
 
 # imports
 import csv
@@ -58,10 +64,6 @@ def get_image(name):
     else:
         return img_to_array(load_img(name))
 
-# how many outputs per input
-# each row * left/right/center * +/-
-GENERATOR_PERMUTATIONS = 1 * 3 * 2
-AUGMENT_ANGLE = 0.2
 def generator(samples, batch_size=32, augment = False):
     num_samples = len(samples)
     while 1: # Loop forever so the generator never terminates
@@ -108,7 +110,7 @@ def generator(samples, batch_size=32, augment = False):
 
 
 def train_model():
-    get_data('/home/rmoore/src/personal/carnd/project3/recordings/data/')
+    get_data('/home/ubuntu/src/personal/carnd/project3/recordings/data/')
     train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 
     # compile and train the model using the generator function
@@ -117,8 +119,8 @@ def train_model():
 
     train = driving_model(INPUT_SHAPE)
 
-    train.fit_generator(train_generator, samples_per_epoch=len(train_samples) * GENERATOR_PERMUTATIONS, nb_val_samples=len(validation_samples), validation_data=validation_generator, nb_epoch=3)
-    train.save('model.h5')
+    train.fit_generator(train_generator, samples_per_epoch=len(train_samples) * GENERATOR_PERMUTATIONS, nb_val_samples=len(validation_samples), validation_data=validation_generator, nb_epoch=EPOCHS)
+    train.save('xmodel.h5')
 
 if __name__ == '__main__':
     train_model()
