@@ -52,7 +52,10 @@ def get_data(recording_path):
             samples.append(row)
 
 def get_image(name):
-    return img_to_array(load_img(name, grayscale=True))
+    if INPUT_SHAPE[2] == 1:
+        return img_to_array(load_img(name, grayscale=True))
+    else:
+        return img_to_array(load_img(name))
 
 # how many outputs per input
 # each row * left/right/center * +/-
