@@ -66,6 +66,7 @@ def driving_model(input_shape):
         model.summary()
     return model
 
+
 def get_data(recording_path):
     data = []
     with open(recording_path + 'driving_log.csv') as infile:
@@ -75,11 +76,13 @@ def get_data(recording_path):
                 data.append(row)
     return data
 
+
 def get_image(name):
     if INPUT_SHAPE[2] == 1:
         return img_to_array(load_img(name, grayscale=True))
     else:
         return img_to_array(load_img(name))
+
 
 def count_samples(samples):
     generator_count = 0
@@ -158,6 +161,8 @@ def train_model():
     )
     train.save('xmodel.h5')
 
+
+# load CUDA and TF stuff before work starts
 def pre_run():
     import tensorflow as tf
     # Creates a graph.
@@ -169,9 +174,12 @@ def pre_run():
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
     sess.run(c)
 
+
+# prevents exception on exit due to GC ordering - tensorflow/tensorflow#3388
 def post_run():
     from keras import backend as K
-    K.clear_session() # tensorflow/tensorflow#3388
+    K.clear_session()
+
 
 if __name__ == '__main__':
 
