@@ -4,7 +4,7 @@ AUGMENT_ANGLE = 0.25 # angle offset for L/R images
 BATCH_SIZE = 64
 EPOCHS = 25
 INPUT_SHAPE = (160,320,3) # TF ordering, not TH ordering - all class docs seem to get this wrong?
-LEARNING_RATE = 0.01
+LEARNING_RATE = 0.0001
 SPEED_CUTOFF = 20
 STEERING_CUTOFF = 0.01
 
@@ -61,8 +61,8 @@ def driving_model(input_shape):
 
         model.add(Dense(1, name='steering_prediction'))
 
-        #model.compile(optimizer=Adam(lr=LEARNING_RATE), loss='mean_squared_error')
-        model.compile(optimizer='adam', loss='mean_squared_error')
+        model.compile(optimizer=Adam(lr=LEARNING_RATE), loss='mean_squared_error')
+        #model.compile(optimizer='adam', loss='mean_squared_error')
         model.summary()
     return model
 
