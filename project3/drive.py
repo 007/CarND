@@ -1,6 +1,7 @@
 import argparse
 import base64
 import json
+import sys
 
 import numpy as np
 import socketio
@@ -45,6 +46,11 @@ def telemetry(sid, data):
     print(steering_angle, throttle)
     send_control(steering_angle, throttle)
 
+
+@sio.on('disconnect')
+def disconnect(environ):
+    print("DISconnect ")
+    sys.exit()
 
 @sio.on('connect')
 def connect(sid, environ):
