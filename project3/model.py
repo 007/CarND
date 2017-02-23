@@ -9,6 +9,11 @@ OVERSTEER_ADJUSTMENT = 1.0 # magnify steering angles by this factor for training
 SPEED_CUTOFF = 30
 STEERING_CUTOFF = 0.01
 
+CROP_TOP = 70
+CROP_BOTTOM = 10
+CROP_LEFT = 10
+CROP_RIGHT = 10
+
 # imports
 import csv
 import numpy as np
@@ -16,10 +21,10 @@ import sklearn
 from sklearn.model_selection import train_test_split
 
 from keras.callbacks import ModelCheckpoint
-from keras.layers.convolutional import Cropping2D, Convolution2D, UpSampling2D
-from keras.layers.core import Activation, Dense, Dropout, Flatten, Lambda
+from keras.layers.convolutional import Cropping2D, Convolution2D
+from keras.layers.core import Dense, Dropout, Flatten, Lambda
 from keras.layers.normalization import BatchNormalization
-from keras.layers.pooling import AveragePooling2D, MaxPooling2D
+from keras.layers.pooling import AveragePooling2D
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.preprocessing.image import load_img, img_to_array
@@ -33,53 +38,32 @@ def driving_model(input_shape):
 
         model = Sequential();
         # Crop - eliminate as much data as posible before other processing
-        model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=input_shape, name='crop'))
-        # downsample
-        model.add(AveragePooling2D(pool_size=(2,2), name='shrink'))
-        # Normalize
-        model.add(Lambda(lambda x: (x / 255.0) - 0.5, name='normalize'))
+        model.add(Cropping2D(cropping=((CROP_TOP,CROP_BOTTOM),(CROP_LEFT,CROP_RIGHT)), input_shape=input_shape, name='crop'))
+        model.add(AveragePooling2D(pool_size=(2,2), name='shrink')) # downsample
 
-        # Conv2D
-        model.add(Convolution2D(32, 5, 5, name='conv_5x5'))
-        model.add(MaxPooling2D(name='max_pool'))
-        model.add(BatchNormalization())
-        model.add(Activation('relu', name='conv_activation'))
+        # NVIDIA architecture
+        # From https://devblogs.nvidia.com/parallelforall/deep-learning-self-driving-cars/
+        # 1 normalization layer, 5 conv layers, 3 fc layers
+        model.add(Lambda(lambda x: (x / 127.5) - 1, name='normalize')) # Normalize
 
-        model.add(Dropout(0.5))
+        model.add(Convolution2D(24, 5, 5, border_mode='same', subsample=(2,2), name='conv_5_1'))
+        model.add(Convolution2D(36, 5, 5, border_mode='same', subsample=(2,2), name='conv_5_2'))
+        model.add(Convolution2D(48, 5, 5, border_mode='same', subsample=(2,2), name='conv_5_3'))
 
-        model.add(Flatten())
+        model.add(Convolution2D(64, 3, 3, name='conv_3_1'))
+        model.add(Convolution2D(64, 3, 3, name='conv_3_2'))
 
-        model.add(Dense(256, name='fc_0'))
-        model.add(BatchNormalization())
-        model.add(Activation('relu', name='activation_0'))
+        model.add(Dropout(0.4))
+        model.add(Flatten(name='flatten'))
 
-        model.add(Dense(128, name='fc_1'))
-#        model.add(BatchNormalization())
-        model.add(Activation('relu', name='activation_1'))
-
-        model.add(Dense(64, name='fc_2'))
-#        model.add(BatchNormalization())
-        model.add(Activation('relu', name='activation_2'))
-
-        model.add(Dense(32, name='fc_3'))
-#        model.add(BatchNormalization())
-        model.add(Activation('relu', name='activation_3'))
-
-        model.add(Dense(16, name='fc_4'))
-        model.add(Activation('relu', name='activation_4'))
-
-        model.add(Dense(8, name='fc_5'))
-        model.add(Activation('relu', name='activation_5'))
-
-        model.add(Dense(4, name='fc_6'))
-        model.add(Activation('relu', name='activation_6'))
-
-        model.add(Dense(2, name='fc_7'))
-        model.add(Activation('relu', name='activation_7'))
+        model.add(Dense(100, activation='relu', name='fc_1'))
+        model.add(Dense(50, activation='relu', name='fc_2'))
+        model.add(Dense(10, activation='relu', name='fc_3'))
 
         model.add(Dense(1, name='steering_prediction'))
 
-        model.compile(optimizer=Adam(lr=LEARNING_RATE), loss='mean_squared_error')
+        #model.compile(optimizer=Adam(lr=LEARNING_RATE), loss='mean_squared_error')
+        model.compile(optimizer='adam', loss='mean_squared_error')
         model.summary()
     return model
 
