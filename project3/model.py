@@ -5,7 +5,7 @@ BATCH_SIZE = 64
 EPOCHS = 25
 INPUT_SHAPE = (160,320,3) # TF ordering, not TH ordering - all class docs seem to get this wrong?
 LEARNING_RATE = 0.01
-SPEED_CUTOFF = 30
+SPEED_CUTOFF = 20
 STEERING_CUTOFF = 0.01
 
 CROP_TOP = 70
@@ -71,7 +71,7 @@ def get_data(recording_path):
     with open(recording_path + 'driving_log.csv') as infile:
         for row in csv.DictReader(infile):
             row['path'] = recording_path
-            if abs(float(row['steering'])) > STEERING_CUTOFF and float(row['speed']) > SPEED_CUTOFF:
+            if abs(float(row['steering'])) >= STEERING_CUTOFF and float(row['speed']) >= SPEED_CUTOFF:
                 data.append(row)
     return data
 
