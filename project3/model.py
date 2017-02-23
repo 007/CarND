@@ -167,12 +167,11 @@ def pre_run():
     import tensorflow as tf
     # Creates a graph.
     with tf.device('/gpu:0'):
-      a = tf.constant(1, name='a')
-      b = tf.constant(1, name='b')
-      c = tf.add(a, b)
+      a = tf.constant(0, name='a')
+      x = tf.add(a, a)
     # Creates a session with allow_soft_placement
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
-    sess.run(c)
+    sess.run(x)
 
 
 # prevents exception on exit due to GC ordering - tensorflow/tensorflow#3388
