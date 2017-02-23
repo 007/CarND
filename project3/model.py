@@ -184,8 +184,9 @@ if __name__ == '__main__':
 
     pre_run()
 
-    train_samples = get_data('/home/rmoore/src/personal/carnd/project3/recordings/ideal/')
-    validation_samples = get_data('/home/rmoore/src/personal/carnd/project3/recordings/smooth/')
+    # train_samples = get_data('/home/rmoore/src/personal/carnd/project3/recordings/ideal/')
+    # validation_samples = get_data('/home/rmoore/src/personal/carnd/project3/recordings/smooth/')
+    train_samples, validation_samples = train_test_split(get_data('/home/rmoore/src/personal/carnd/project3/recordings/data/'), test_size=0.2)
     train_model()
 
     post_run()
