@@ -5,7 +5,6 @@ BATCH_SIZE = 64
 EPOCHS = 25
 INPUT_SHAPE = (160,320,3) # TF ordering, not TH ordering - all class docs seem to get this wrong?
 LEARNING_RATE = 0.01
-OVERSTEER_ADJUSTMENT = 1.0 # magnify steering angles by this factor for training
 SPEED_CUTOFF = 30
 STEERING_CUTOFF = 0.01
 
@@ -106,7 +105,7 @@ def generator(samples, batch_size=32, augment = False):
 
                 name = row['path'] + row['center'].strip()
                 image = get_image(name)
-                angle = float(row['steering']) * OVERSTEER_ADJUSTMENT
+                angle = float(row['steering'])
                 images.append(image)
                 angles.append(angle)
 
@@ -118,7 +117,7 @@ def generator(samples, batch_size=32, augment = False):
                     if 'left' in row and len(row['left']) > 0:
                         name = row['path'] + row['left'].strip()
                         image = get_image(name)
-                        angle = float(row['steering']) * OVERSTEER_ADJUSTMENT + AUGMENT_ANGLE
+                        angle = float(row['steering']) + AUGMENT_ANGLE
                         images.append(image)
                         angles.append(angle)
                         image = np.fliplr(image)
@@ -128,7 +127,7 @@ def generator(samples, batch_size=32, augment = False):
                     if 'right' in row and len(row['right']) > 0:
                         name = row['path'] + row['right'].strip()
                         image = get_image(name)
-                        angle = float(row['steering']) * OVERSTEER_ADJUSTMENT - AUGMENT_ANGLE
+                        angle = float(row['steering']) - AUGMENT_ANGLE
                         images.append(image)
                         angles.append(angle)
                         image = np.fliplr(image)
