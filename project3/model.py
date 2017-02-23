@@ -146,13 +146,15 @@ def train_model():
 
     train = driving_model(INPUT_SHAPE)
 
-    checkpoint = ModelCheckpoint('checkpoint-{val_loss:.4f}.h5', monitor='val_loss', mode='min', verbose=1, save_best_only=True)
+    #checkpoint = ModelCheckpoint('checkpoint-{val_loss:.4f}.h5', monitor='val_loss', mode='min', verbose=1, save_best_only=True)
+    checkpoint = ModelCheckpoint('best-so-far.h5', monitor='val_loss', mode='min', verbose=1, save_best_only=True)
     train.fit_generator(train_generator,
         samples_per_epoch=count_samples(train_samples),
         nb_val_samples=len(validation_samples),
         validation_data=validation_generator,
         nb_epoch=EPOCHS,
-        callbacks=[checkpoint]
+        callbacks=[checkpoint],
+        verbose=2,
     )
     train.save('xmodel.h5')
 
