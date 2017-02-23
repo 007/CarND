@@ -1,14 +1,13 @@
-BATCH_SIZE = 64
-EPOCHS = 25
-
-# TF ordering, not TH ordering - all class docs seem to get this wrong?
-INPUT_SHAPE = (160,320,3)
+#!/usr/bin/env python
 
 AUGMENT_ANGLE = 0.25 # angle offset for L/R images
-OVERSTEER_ADJUSTMENT = 1.0 # magnify steering angles by this factor for training
+BATCH_SIZE = 64
+EPOCHS = 25
+INPUT_SHAPE = (160,320,3) # TF ordering, not TH ordering - all class docs seem to get this wrong?
 LEARNING_RATE = 0.01
-STEERING_CUTOFF = 0.01
+OVERSTEER_ADJUSTMENT = 1.0 # magnify steering angles by this factor for training
 SPEED_CUTOFF = 30
+STEERING_CUTOFF = 0.01
 
 # imports
 import csv
@@ -16,16 +15,14 @@ import numpy as np
 import sklearn
 from sklearn.model_selection import train_test_split
 
-from keras.models import Sequential
-from keras.layers.core import Activation, Dense, Dropout, Flatten, Lambda
+from keras.callbacks import ModelCheckpoint
 from keras.layers.convolutional import Cropping2D, Convolution2D, UpSampling2D
+from keras.layers.core import Activation, Dense, Dropout, Flatten, Lambda
 from keras.layers.normalization import BatchNormalization
 from keras.layers.pooling import AveragePooling2D, MaxPooling2D
-from keras.preprocessing.image import load_img, img_to_array
+from keras.models import Sequential
 from keras.optimizers import Adam
-
-#from keras_tqdm import TQDMCallback
-from keras.callbacks import ModelCheckpoint
+from keras.preprocessing.image import load_img, img_to_array
 
 model = None
 
@@ -160,23 +157,18 @@ def generator(samples, batch_size=32, augment = False):
 
 
 def train_model():
-#    get_data(data_path)
-#    train_samples, validation_samples = train_test_split(samples, test_size=0.2)
-
     # compile and train the model using the generator function
     train_generator = generator(train_samples, batch_size=BATCH_SIZE, augment = True)
     validation_generator = generator(validation_samples, batch_size=BATCH_SIZE)
 
     train = driving_model(INPUT_SHAPE)
 
-#    tf_session = keras.backend.get_session()
     checkpoint = ModelCheckpoint('checkpoint-{val_loss:.4f}.h5', monitor='val_loss', mode='min', verbose=1, save_best_only=True)
     train.fit_generator(train_generator,
         samples_per_epoch=count_samples(train_samples),
         nb_val_samples=len(validation_samples),
         validation_data=validation_generator,
         nb_epoch=EPOCHS,
-#        verbose=0, callbacks=[TQDMCallback()] # tqdm progress bars
         callbacks=[checkpoint]
     )
     train.save('xmodel.h5')
@@ -200,7 +192,6 @@ if __name__ == '__main__':
 
     pre_run()
 
-    #train_samples = get_data('/home/rmoore/src/personal/carnd/project3/recordings/data/')
     train_samples = get_data('/home/rmoore/src/personal/carnd/project3/recordings/ideal/')
     validation_samples = get_data('/home/rmoore/src/personal/carnd/project3/recordings/smooth/')
     train_model()
