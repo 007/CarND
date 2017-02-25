@@ -73,12 +73,11 @@ def driving_model(input_shape):
 
 
 def get_data(recording_path):
+    columns = ('center', 'left', 'right', 'steering', 'throttle', 'brake', 'speed')
     data = []
     with open(recording_path + 'driving_log.csv') as infile:
-        for row in csv.DictReader(infile):
-            row['path'] = recording_path
-            if abs(float(row['steering'])) >= STEERING_CUTOFF and float(row['speed']) >= SPEED_CUTOFF:
-                data.append(row)
+        for row in csv.DictReader(infile, fieldnames=columns):
+            data.append(row)
     return data
 
 
