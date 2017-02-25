@@ -98,6 +98,18 @@ def count_samples(samples):
             generator_count = generator_count + 2
     return generator_count
 
+def augmentation_helper(row, index, offset_multiplier=1.0):
+    images, angles = [], []
+    if index in row and len(row[index]) > 0:
+        name = row[index].strip()
+        image = get_image(name)
+        angle = float(row['steering']) + (AUGMENT_ANGLE * offset_multiplier)
+        images.append(image)
+        angles.append(angle)
+        image = np.fliplr(image)
+        images.append(image)
+        angles.append(angle * -1.0)
+    return (images, angles)
 
 def generator(samples, batch_size=32, augment = False):
     num_samples = len(samples)
@@ -109,37 +121,18 @@ def generator(samples, batch_size=32, augment = False):
             images = []
             angles = []
             for row in batch_samples:
-
-                name = row['path'] + row['center'].strip()
-                image = get_image(name)
-                angle = float(row['steering'])
-                images.append(image)
-                angles.append(angle)
+                img, ang = augmentation_helper(row, 'center', 0)
+                images.extend(img)
+                angles.extend(ang)
 
                 if augment:
-                    image = np.fliplr(image)
-                    images.append(image)
-                    angles.append(-angle)
+                    img, ang = augmentation_helper(row, 'left', 1)
+                    images.extend(img)
+                    angles.extend(ang)
 
-                    if 'left' in row and len(row['left']) > 0:
-                        name = row['path'] + row['left'].strip()
-                        image = get_image(name)
-                        angle = float(row['steering']) + AUGMENT_ANGLE
-                        images.append(image)
-                        angles.append(angle)
-                        image = np.fliplr(image)
-                        images.append(image)
-                        angles.append(-angle)
-
-                    if 'right' in row and len(row['right']) > 0:
-                        name = row['path'] + row['right'].strip()
-                        image = get_image(name)
-                        angle = float(row['steering']) - AUGMENT_ANGLE
-                        images.append(image)
-                        angles.append(angle)
-                        image = np.fliplr(image)
-                        images.append(image)
-                        angles.append(-angle)
+                    img, ang = augmentation_helper(row, 'right', -1.0)
+                    images.extend(img)
+                    angles.extend(ang)
 
             X_train = np.array(images)
             y_train = np.array(angles)
