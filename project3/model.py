@@ -5,8 +5,6 @@ BATCH_SIZE = 512
 EPOCHS = 50
 INPUT_SHAPE = (160,320,3) # TF ordering, not TH ordering - all class docs seem to get this wrong?
 LEARNING_RATE = 0.0001
-SPEED_CUTOFF = 20
-STEERING_CUTOFF = 0.01
 
 CROP_TOP = 70
 CROP_BOTTOM = 10
@@ -67,7 +65,6 @@ def driving_model(input_shape):
         model.add(Dense(1, name='steering_prediction'))
 
         model.compile(optimizer=Adam(lr=LEARNING_RATE), loss='mean_squared_error')
-        #model.compile(optimizer='adam', loss='mean_squared_error')
         model.summary()
     return model
 
@@ -155,7 +152,6 @@ def train_model():
     print('Validation samples: {}'.format(valid_count))
     print('-=' * 40)
 
-    #checkpoint = ModelCheckpoint('checkpoint-{val_loss:.4f}.h5', monitor='val_loss', mode='min', verbose=1, save_best_only=True)
     checkpoint = ModelCheckpoint('best-so-far.h5', monitor='val_loss', mode='min', verbose=1, save_best_only=True)
     train.fit_generator(train_generator,
         samples_per_epoch=train_count,
