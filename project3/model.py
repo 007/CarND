@@ -57,7 +57,7 @@ def driving_model(input_shape):
         model.add(Convolution2D(64, 3, 3, name='conv_3_1'))
         model.add(Convolution2D(64, 3, 3, name='conv_3_2'))
 
-        model.add(Dropout(0.4))
+        model.add(Dropout(0.8))
         model.add(Flatten(name='flatten'))
 
         model.add(Dense(100, activation='relu', name='fc_1'))
