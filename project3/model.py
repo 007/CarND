@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-AUGMENT_ANGLE = 0.1 # angle offset for L/R images
+AUGMENT_ANGLE = 0.4 # angle offset for L/R images
 BATCH_SIZE = 512
-EPOCHS = 50
+EPOCHS = 10
 INPUT_SHAPE = (160,320,3) # TF ordering, not TH ordering - all class docs seem to get this wrong?
 LEARNING_RATE = 0.0001
 SPEED_CUTOFF = 20
@@ -10,8 +10,8 @@ STEERING_CUTOFF = 0.01
 
 CROP_TOP = 70
 CROP_BOTTOM = 10
-CROP_LEFT = 10
-CROP_RIGHT = 10
+CROP_LEFT = 0
+CROP_RIGHT = 0
 
 # imports
 import csv
