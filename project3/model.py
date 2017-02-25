@@ -29,7 +29,7 @@ from keras.layers.normalization import BatchNormalization
 from keras.layers.pooling import AveragePooling2D
 from keras.models import Sequential
 from keras.optimizers import Adam
-from keras.preprocessing.image import load_img, img_to_array
+from keras.preprocessing.image import load_img, img_to_array, flip_axis
 
 model = None
 
@@ -106,7 +106,7 @@ def augmentation_helper(row, index, offset_multiplier=1.0):
         angle = float(row['steering']) + (AUGMENT_ANGLE * offset_multiplier)
         images.append(image)
         angles.append(angle)
-        image = np.fliplr(image)
+        image = flip_axis(image, 1)
         images.append(image)
         angles.append(angle * -1.0)
     return (images, angles)
@@ -146,12 +146,20 @@ def train_model():
     validation_generator = generator(validation_samples, batch_size=BATCH_SIZE)
 
     train = driving_model(INPUT_SHAPE)
+    train_count = count_samples(train_samples)
+    valid_count = len(validation_samples) * 2 # augmentation_helper flips center channel even without L/R augmentation
+
+    print('-=' * 40)
+    print('  Training samples: {}'.format(len(train_samples)))
+    print(' With augmentation: {}'.format(train_count))
+    print('Validation samples: {}'.format(valid_count))
+    print('-=' * 40)
 
     #checkpoint = ModelCheckpoint('checkpoint-{val_loss:.4f}.h5', monitor='val_loss', mode='min', verbose=1, save_best_only=True)
     checkpoint = ModelCheckpoint('best-so-far.h5', monitor='val_loss', mode='min', verbose=1, save_best_only=True)
     train.fit_generator(train_generator,
-        samples_per_epoch=count_samples(train_samples),
-        nb_val_samples=len(validation_samples),
+        samples_per_epoch=train_count,
+        nb_val_samples=valid_count,
         validation_data=validation_generator,
         nb_epoch=EPOCHS,
         callbacks=[checkpoint],
