@@ -20,6 +20,7 @@ import sklearn
 from sklearn.model_selection import train_test_split
 
 from keras.callbacks import ModelCheckpoint
+from keras.engine.topology import InputLayer
 from keras.layers.convolutional import Cropping2D, Convolution2D
 from keras.layers.core import Dense, Dropout, Flatten, Lambda
 from keras.layers.normalization import BatchNormalization
@@ -36,8 +37,10 @@ def driving_model(input_shape):
     if model == None:
 
         model = Sequential();
+        model.add(InputLayer(input_shape=input_shape, name='start'))
+
         # Crop - eliminate as much data as posible before other processing
-        model.add(Cropping2D(cropping=((CROP_TOP,CROP_BOTTOM),(CROP_LEFT,CROP_RIGHT)), input_shape=input_shape, name='crop'))
+        model.add(Cropping2D(cropping=((CROP_TOP,CROP_BOTTOM),(CROP_LEFT,CROP_RIGHT)), name='crop'))
         model.add(AveragePooling2D(pool_size=(2,2), name='shrink')) # downsample
 
         # NVIDIA architecture
