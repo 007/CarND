@@ -13,6 +13,8 @@ CROP_BOTTOM = 10
 CROP_LEFT = 0
 CROP_RIGHT = 0
 
+CROP_SHAPE = ((CROP_TOP,CROP_BOTTOM),(CROP_LEFT,CROP_RIGHT))
+
 # imports
 import csv
 import numpy as np
@@ -40,7 +42,7 @@ def driving_model(input_shape):
         model.add(InputLayer(input_shape=input_shape, name='start'))
 
         # Crop - eliminate as much data as posible before other processing
-        model.add(Cropping2D(cropping=((CROP_TOP,CROP_BOTTOM),(CROP_LEFT,CROP_RIGHT)), name='crop'))
+        model.add(Cropping2D(cropping=CROP_SHAPE, name='crop'))
         model.add(AveragePooling2D(pool_size=(2,2), name='shrink')) # downsample
 
         # NVIDIA architecture
