@@ -60,9 +60,9 @@ def driving_model(input_shape):
         model.add(Dropout(0.8))
         model.add(Flatten(name='flatten'))
 
-        model.add(Dense(100, activation='relu', name='fc_1'))
-        model.add(Dense(50, activation='relu', name='fc_2'))
-        model.add(Dense(10, activation='relu', name='fc_3'))
+        model.add(Dense(100, activation='elu', name='fc_1'))
+        model.add(Dense(50, activation='elu', name='fc_2'))
+        model.add(Dense(10, activation='elu', name='fc_3'))
 
         model.add(Dense(1, name='steering_prediction'))
 
