@@ -2,7 +2,7 @@
 
 AUGMENT_ANGLE = 0.4 # angle offset for L/R images
 BATCH_SIZE = 512
-EPOCHS = 10
+EPOCHS = 50
 INPUT_SHAPE = (160,320,3) # TF ordering, not TH ordering - all class docs seem to get this wrong?
 LEARNING_RATE = 0.0001
 SPEED_CUTOFF = 20
@@ -111,7 +111,8 @@ def augmentation_helper(row, index, offset_multiplier=1.0):
         angles.append(angle * -1.0)
     return (images, angles)
 
-def generator(samples, batch_size=32, augment = False):
+
+def generator(samples, batch_size=32, augment=False):
     num_samples = len(samples)
     while 1: # Loop forever so the generator never terminates
         samples = sklearn.utils.shuffle(samples)
@@ -183,7 +184,7 @@ if __name__ == '__main__':
 
     # train_samples = get_data('/home/rmoore/src/personal/carnd/project3/recordings/ideal/')
     # validation_samples = get_data('/home/rmoore/src/personal/carnd/project3/recordings/smooth/')
-    train_samples, validation_samples = train_test_split(get_data('/home/rmoore/src/personal/carnd/project3/recordings/data/'), test_size=0.2)
+    train_samples, validation_samples = train_test_split(get_data('/home/rmoore/src/personal/carnd/project3/recordings/total/'), test_size=0.2)
     train_model()
 
     post_run()
