@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
+# Things to play with
 AUGMENT_ANGLE = 0.3 # angle offset for L/R images
 BATCH_SIZE = 32
 EPOCHS = 25
 INPUT_SHAPE = (160,320,3) # TF ordering, not TH ordering - all class docs seem to get this wrong?
 LEARNING_RATE = 0.01
 
+# how much to crop off each edge
 CROP_TOP = 80
 CROP_BOTTOM = 10
 CROP_LEFT = 0
@@ -16,15 +18,13 @@ CROP_SHAPE = ((CROP_TOP,CROP_BOTTOM),(CROP_LEFT,CROP_RIGHT))
 # imports
 import csv
 import numpy as np
-import sklearn
-from sklearn.model_selection import train_test_split
+import sklearn # only need for one function
 
 from keras.callbacks import ModelCheckpoint
 from keras.engine.topology import InputLayer
 from keras.layers.convolutional import Cropping2D, Convolution2D
 from keras.layers.core import Activation, Dense, Dropout, Flatten, Lambda
 from keras.layers.normalization import BatchNormalization
-from keras.layers.pooling import AveragePooling2D
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.preprocessing.image import load_img, img_to_array, flip_axis
@@ -81,7 +81,7 @@ def driving_model(input_shape):
         model.summary()
     return model
 
-
+# load CSV
 def get_data(recording_path):
     columns = ('center', 'left', 'right', 'steering', 'throttle', 'brake', 'speed')
     data = []
@@ -90,7 +90,7 @@ def get_data(recording_path):
             data.append(row)
     return data
 
-
+# load image
 def get_image(name):
     if INPUT_SHAPE[2] == 1:
         return img_to_array(load_img(name, grayscale=True))
@@ -98,10 +98,11 @@ def get_image(name):
         return img_to_array(load_img(name))
 
 
+# count samples that will be returned after augmentation
 def count_samples(samples, augment=False):
     generator_count = 0
     for row in samples:
-        generator_count = generator_count + 2
+        generator_count = generator_count + 2 # always do center + flip
         if augment:
             if 'left' in row and len(row['left']) > 0:
                 generator_count = generator_count + 2
@@ -109,6 +110,7 @@ def count_samples(samples, augment=False):
                 generator_count = generator_count + 2
     return generator_count
 
+# load image, adjust steering angle, flip image and angle
 def augmentation_helper(row, index, offset_multiplier=1.0):
     images, angles = [], []
     if index in row and len(row[index]) > 0:
@@ -122,7 +124,7 @@ def augmentation_helper(row, index, offset_multiplier=1.0):
         angles.append(angle * -1.0)
     return (images, angles)
 
-
+# generative wrapper based on class material
 def generator(samples, batch_size=32, augment=False):
     num_samples = len(samples)
     while 1: # Loop forever so the generator never terminates
@@ -173,29 +175,26 @@ def train_model():
         validation_data=validation_generator,
         nb_epoch=EPOCHS,
         callbacks=[checkpoint],
-    #    verbose=2,
+        verbose=2,
     )
     train.save('xmodel.h5')
 
-
 # load CUDA and TF stuff before work starts
+# gives cleaner output for stats / summary / training
 def pre_run():
-    import tensorflow as tf
-    # Creates a graph.
+    import tensorflow as tf # boo to function-level imports
     with tf.device('/gpu:0'):
       a = tf.constant(0, name='a')
       x = tf.add(a, a)
-    # Creates a session with allow_soft_placement
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
     sess.run(x)
-
 
 # prevents exception on exit due to GC ordering - tensorflow/tensorflow#3388
 def post_run():
     from keras import backend as K
     K.clear_session()
 
-
+# Do stuff
 if __name__ == '__main__':
 
     pre_run()
@@ -204,7 +203,6 @@ if __name__ == '__main__':
     train_samples.extend(get_data('/home/rmoore/src/personal/carnd/project3/recordings/tons/'))
     train_samples.extend(get_data('/home/rmoore/src/personal/carnd/project3/recordings/recovery/'))
     validation_samples = get_data('/home/rmoore/src/personal/carnd/project3/recordings/data/')
-#    train_samples, validation_samples = train_test_split(get_data('/home/rmoore/src/personal/carnd/project3/recordings/total/'), test_size=0.2)
     train_model()
 
     post_run()
