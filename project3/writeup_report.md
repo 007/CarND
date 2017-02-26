@@ -2,18 +2,16 @@
 
 ##Writeup Template
 
-###You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
 ---
 
 **Behavioral Cloning Project**
 
 The goals / steps of this project are the following:
-* Use the simulator to collect data of good driving behavior
-* Build, a convolution neural network in Keras that predicts steering angles from images
-* Train and validate the model with a training and validation set
-* Test that the model successfully drives around track one without leaving the road
-* Summarize the results with a written report
+- [ ] Use the simulator to collect data of good driving behavior
+- [ ] Build, a convolution neural network in Keras that predicts steering angles from images
+- [ ] Train and validate the model with a training and validation set
+- [ ] Test that the model successfully drives around track one without leaving the road
+- [ ] Summarize the results with a written report
 
 
 [//]: # (Image References)
@@ -54,25 +52,65 @@ The model.py file contains the code for training and saving the convolution neur
 
 ####1. An appropriate model architecture has been employed
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
+My model implements the [NVIDIA SDC architecture](https://devblogs.nvidia.com/parallelforall/deep-learning-self-driving-cars/) with a few modifications.
 
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
+It first employs cropping in-model, as recommended in the associated paper. I found that this does provide for a simpler workflow and faster round-trip time for experiments. I chose to use the equivalent of the [Comma.ai normalization](https://github.com/commaai/research/blob/master/train_steering_model.py#L28-L30) to a range of -1..1 instead of the standard `x / 255` range of 0..1. The model uses [3 layers](model.py#L59-61) of 5x5 convolution, each with a stride of 2. They vary in depth, increasing from 24 to 36 to 48. Then there are [two identical layers](model.py#L63-64), 3x3 convolution with stride 1 and depth 64.
+
+After flattening, there are [3 fully-connected layers](model.py#68-70) of the form (`fc / bn / elu / drop`)[model.py#L35-38]. The FC layer depths are 100, 50 and 10, respectively. [Batch normalization](https://arxiv.org/abs/1502.03167) is employed between the FC layer and the activation function to provide more consistent values. The activation function is exponential rectified linear unit (ELU) versus the usual ReLU.
+
+Model summary below:
+
+| Layer | Type                    | Output Shape         | Params    | Connected to              |
+| ------ | ------------------------ | -------------------- | ---------- | ------------------------- |
+| start | (InputLayer)              | (160, 320, 3)  | 0          |                           |
+| crop | (Cropping2D)               | (70, 320, 3)   | 0          | start               |
+| normalize | (Lambda)              | (70, 320, 3)   | 0          | crop                |
+| dropout_0 | (Dropout)             | (70, 320, 3)   | 0          | normalize           |
+| conv_5_1 | (Convolution2D)        | (35, 160, 24)  | 1824       | dropout_0           |
+| conv_5_2 | (Convolution2D)        | (18, 80, 36)   | 21636      | conv_5_1            |
+| conv_5_3 | (Convolution2D)        | (9, 40, 48)    | 43248      | conv_5_2            |
+| conv_3_1 | (Convolution2D)        | (7, 38, 64)    | 27712      | conv_5_3            |
+| conv_3_2 | (Convolution2D)        | (5, 36, 64)    | 36928      | conv_3_1            |
+| flatten | (Flatten)               | (11520)        | 0          | conv_3_2            |
+| dense_1 | (Dense)                 | (100)          | 1152100    | flatten             |
+| batchnormalization_1 | (BatchNormalization)| (100)          | 400        | dense_1             |
+| activation_1 | (Activation)       | (100)          | 0          | batchnormalization_1 |
+| dropout_1 | (Dropout)             | (100)          | 0          | activation_1        |
+| dense_2 | (Dense)                 | (50)           | 5050       | dropout_1           |
+| batchnormalization_2 | (BatchNormalization)| (50)           | 200        | dense_2             |
+| activation_2 | (Activation)       | (50)           | 0          | batchnormalization_2 |
+| dropout_2 | (Dropout)             | (50)           | 0          | activation_2        |
+| dense_3 | (Dense)                 | (10)           | 510        | dropout_2           |
+| batchnormalization_3 | (BatchNormalization)| (10)           | 40         | dense_3             |
+| activation_3 | (Activation)       | (10)           | 0          | batchnormalization_3 |
+| dropout_3 | (Dropout)             | (10)           | 0          | activation_3        |
+| steering_prediction | (Dense)     | (1)            | 11         | dropout_3           |
+
+| **Trainable params** | **1,289,339** |
+| :---: | :---: | :---: |
+| **Non-trainable params** | **320** |
+| **Total params** | **1,289,659** |
+
+---
+
 
 ####2. Attempts to reduce overfitting in the model
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
+The model contains dropout layers in order to reduce overfitting. There is a dropout from the [initial input](model.py#L57), as well as [individual dropout](model.py#L38) between each FC layer.
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+The model was [trained](model.py#201-202) and [validated](model.py#203) on different data sets to ensure that the model was not overfitting. The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
 ####3. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+The model used an [Adam optimizer](http://sebastianruder.com/optimizing-gradient-descent/index.html#adam). The learning rate was set much higher than the initial / default value due to use of multiple dropout layers, as recommended in the original [dropout paper](http://www.jmlr.org/papers/v15/srivastava14a.html). Since Adam is a self-tuning optimizer, this had less effect than it would have with SGD or similar.
 
 ####4. Appropriate training data
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+Training data was generated several ways. Initially I used the class data as provided from Udacity. This turned out to be less than useful, as it combined regular driving with intentional mistakes and correction. I ended up recording my own training data in four distinct batches. The first used keyboard input, but ended up being too noisy with hard transitions between zero steering and over-correction. I then switched to the beta simulator for the second batch, and attempted to create data with the mouse input. The data itself was smoother, but the interface was cumbersome and I ended up including a lot of mistakes due to my lack of finesse with the steering controls.
 
-For details about how I created the training data, see the next section. 
+Finally I ended up using a PS3 controller to get both analog input (vs digital of keyboard) and smooth and simple input (vs cumbersome mouse). With the game controller, I was able to drive efficiently and record useful data. The third batch of data was my primary training input, smooth and consistent driving centered in the lane for several laps in both directions around the track. Batch four was my correction data, where I would drive as before, but switch recording off and back on as I made intentional mistakes and then corrected them. This recovery dataset ended up being much more useful than the default data, since it eliminated the "make a mistake" part of the data, so the system could train only on the "correct a mistake" version.
+
+This step ended up being the **most** important part of the entire project. Regardless of my experiments in the model / architecture section below, running with "bad" data made the results much more erratic and less consistent across even small changes.
 
 ###Model Architecture and Training Strategy
 
