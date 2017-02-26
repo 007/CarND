@@ -1,0 +1,271 @@
+(carnd-term1) rmoore@palpatine:~/src/personal/carnd/project3$ time python ./model.py;rm -f wtfm8/*;./simulator-beta & python ./drive.py best-so-far.h5 true
+Using TensorFlow backend.
+I tensorflow/stream_executor/dso_loader.cc:128] successfully opened CUDA library libcublas.so locally
+I tensorflow/stream_executor/dso_loader.cc:128] successfully opened CUDA library libcudnn.so locally
+I tensorflow/stream_executor/dso_loader.cc:128] successfully opened CUDA library libcufft.so locally
+I tensorflow/stream_executor/dso_loader.cc:128] successfully opened CUDA library libcuda.so.1 locally
+I tensorflow/stream_executor/dso_loader.cc:128] successfully opened CUDA library libcurand.so locally
+I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:937] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+I tensorflow/core/common_runtime/gpu/gpu_device.cc:885] Found device 0 with properties: 
+name: GeForce GTX 1070
+major: 6 minor: 1 memoryClockRate (GHz) 1.683
+pciBusID 0000:01:00.0
+Total memory: 7.92GiB
+Free memory: 7.14GiB
+I tensorflow/core/common_runtime/gpu/gpu_device.cc:906] DMA: 0 
+I tensorflow/core/common_runtime/gpu/gpu_device.cc:916] 0:   Y 
+I tensorflow/core/common_runtime/gpu/gpu_device.cc:975] Creating TensorFlow device (/gpu:0) -> (device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0)
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  Training samples: 9351
+ With augmentation: 56106
+Validation samples: 16072
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+____________________________________________________________________________________________________
+Layer (type)                     Output Shape          Param #     Connected to                     
+====================================================================================================
+start (InputLayer)               (None, 160, 320, 3)   0                                            
+____________________________________________________________________________________________________
+crop (Cropping2D)                (None, 70, 320, 3)    0           start[0][0]                      
+____________________________________________________________________________________________________
+normalize (Lambda)               (None, 70, 320, 3)    0           crop[0][0]                       
+____________________________________________________________________________________________________
+dropout_0 (Dropout)              (None, 70, 320, 3)    0           normalize[0][0]                  
+____________________________________________________________________________________________________
+conv_5_1 (Convolution2D)         (None, 35, 160, 24)   1824        dropout_0[0][0]                  
+____________________________________________________________________________________________________
+conv_5_2 (Convolution2D)         (None, 18, 80, 36)    21636       conv_5_1[0][0]                   
+____________________________________________________________________________________________________
+conv_5_3 (Convolution2D)         (None, 9, 40, 48)     43248       conv_5_2[0][0]                   
+____________________________________________________________________________________________________
+conv_3_1 (Convolution2D)         (None, 7, 38, 64)     27712       conv_5_3[0][0]                   
+____________________________________________________________________________________________________
+conv_3_2 (Convolution2D)         (None, 5, 36, 64)     36928       conv_3_1[0][0]                   
+____________________________________________________________________________________________________
+flatten (Flatten)                (None, 11520)         0           conv_3_2[0][0]                   
+____________________________________________________________________________________________________
+dense_1 (Dense)                  (None, 100)           1152100     flatten[0][0]                    
+____________________________________________________________________________________________________
+batchnormalization_1 (BatchNorma (None, 100)           400         dense_1[0][0]                    
+____________________________________________________________________________________________________
+activation_1 (Activation)        (None, 100)           0           batchnormalization_1[0][0]       
+____________________________________________________________________________________________________
+dropout_1 (Dropout)              (None, 100)           0           activation_1[0][0]               
+____________________________________________________________________________________________________
+dense_2 (Dense)                  (None, 50)            5050        dropout_1[0][0]                  
+____________________________________________________________________________________________________
+batchnormalization_2 (BatchNorma (None, 50)            200         dense_2[0][0]                    
+____________________________________________________________________________________________________
+activation_2 (Activation)        (None, 50)            0           batchnormalization_2[0][0]       
+____________________________________________________________________________________________________
+dropout_2 (Dropout)              (None, 50)            0           activation_2[0][0]               
+____________________________________________________________________________________________________
+dense_3 (Dense)                  (None, 10)            510         dropout_2[0][0]                  
+____________________________________________________________________________________________________
+batchnormalization_3 (BatchNorma (None, 10)            40          dense_3[0][0]                    
+____________________________________________________________________________________________________
+activation_3 (Activation)        (None, 10)            0           batchnormalization_3[0][0]       
+____________________________________________________________________________________________________
+dropout_3 (Dropout)              (None, 10)            0           activation_3[0][0]               
+____________________________________________________________________________________________________
+steering_prediction (Dense)      (None, 1)             11          dropout_3[0][0]                  
+====================================================================================================
+Total params: 1,289,659
+Trainable params: 1,289,339
+Non-trainable params: 320
+____________________________________________________________________________________________________
+Epoch 1/25
+I tensorflow/core/common_runtime/gpu/gpu_device.cc:975] Creating TensorFlow device (/gpu:0) -> (device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0)
+Epoch 00000: val_loss improved from inf to 0.01720, saving model to best-so-far.h5
+60s - loss: 0.1433 - val_loss: 0.0172
+Epoch 2/25
+Epoch 00001: val_loss did not improve
+57s - loss: 0.0345 - val_loss: 0.0187
+Epoch 3/25
+Epoch 00002: val_loss did not improve
+57s - loss: 0.0281 - val_loss: 0.0224
+Epoch 4/25
+Epoch 00003: val_loss did not improve
+58s - loss: 0.0261 - val_loss: 0.0212
+Epoch 5/25
+Epoch 00004: val_loss did not improve
+56s - loss: 0.0255 - val_loss: 0.0266
+Epoch 6/25
+Epoch 00005: val_loss did not improve
+57s - loss: 0.0245 - val_loss: 0.0210
+Epoch 7/25
+Epoch 00006: val_loss did not improve
+57s - loss: 0.0236 - val_loss: 0.0174
+Epoch 8/25
+Epoch 00007: val_loss improved from 0.01720 to 0.01618, saving model to best-so-far.h5
+58s - loss: 0.0231 - val_loss: 0.0162
+Epoch 9/25
+Epoch 00008: val_loss improved from 0.01618 to 0.01511, saving model to best-so-far.h5
+57s - loss: 0.0223 - val_loss: 0.0151
+Epoch 10/25
+Epoch 00009: val_loss did not improve
+58s - loss: 0.0215 - val_loss: 0.0190
+Epoch 11/25
+Epoch 00010: val_loss improved from 0.01511 to 0.01416, saving model to best-so-far.h5
+58s - loss: 0.0212 - val_loss: 0.0142
+Epoch 12/25
+Epoch 00011: val_loss improved from 0.01416 to 0.01311, saving model to best-so-far.h5
+58s - loss: 0.0203 - val_loss: 0.0131
+Epoch 13/25
+Epoch 00012: val_loss improved from 0.01311 to 0.01267, saving model to best-so-far.h5
+57s - loss: 0.0198 - val_loss: 0.0127
+Epoch 14/25
+Epoch 00013: val_loss did not improve
+59s - loss: 0.0196 - val_loss: 0.0138
+Epoch 15/25
+Epoch 00014: val_loss improved from 0.01267 to 0.01239, saving model to best-so-far.h5
+60s - loss: 0.0194 - val_loss: 0.0124
+Epoch 16/25
+Epoch 00015: val_loss did not improve
+59s - loss: 0.0193 - val_loss: 0.0135
+Epoch 17/25
+Epoch 00016: val_loss improved from 0.01239 to 0.01185, saving model to best-so-far.h5
+57s - loss: 0.0190 - val_loss: 0.0118
+Epoch 18/25
+Epoch 00017: val_loss did not improve
+57s - loss: 0.0187 - val_loss: 0.0125
+Epoch 19/25
+Epoch 00018: val_loss did not improve
+58s - loss: 0.0185 - val_loss: 0.0185
+Epoch 20/25
+Epoch 00019: val_loss did not improve
+59s - loss: 0.0187 - val_loss: 0.0158
+Epoch 21/25
+Epoch 00020: val_loss did not improve
+60s - loss: 0.0186 - val_loss: 0.0132
+Epoch 22/25
+Epoch 00021: val_loss did not improve
+58s - loss: 0.0183 - val_loss: 0.0129
+Epoch 23/25
+Epoch 00022: val_loss did not improve
+58s - loss: 0.0185 - val_loss: 0.0125
+Epoch 24/25
+Epoch 00023: val_loss did not improve
+57s - loss: 0.0184 - val_loss: 0.0127
+Epoch 25/25
+Epoch 00024: val_loss did not improve
+57s - loss: 0.0182 - val_loss: 0.0124
+
+real	24m22.250s
+user	28m54.620s
+sys	4m23.015s
+[1] 5335
+Set current directory to /home/rmoore/src/personal/carnd/project3
+Found path: /home/rmoore/src/personal/carnd/project3/simulator-beta
+Mono path[0] = '/home/rmoore/src/personal/carnd/project3/simulator-beta_Data/Managed'
+Mono path[1] = '/home/rmoore/src/personal/carnd/project3/simulator-beta_Data/Mono'
+Mono config path = '/home/rmoore/src/personal/carnd/project3/simulator-beta_Data/Mono/etc'
+displaymanager : xrandr version warning. 1.5
+client has 4 screens
+displaymanager screen (0)(DP-2): 2560 x 1440
+Using libudev for joystick management
+
+
+Importing game controller configs
+Found /dev/input/event10
+Mapping raw axis 0 to 0
+Mapping raw axis 1 to 1
+Mapping raw axis 2 to 2
+Mapping raw axis 5 to 3
+Sony PLAYSTATION(R)3 Controller: Mapping b14.0 to b0
+Sony PLAYSTATION(R)3 Controller: Mapping b13.0 to b1
+Sony PLAYSTATION(R)3 Controller: Mapping b0.0 to b6
+Sony PLAYSTATION(R)3 Controller: Mapping b6.0 to a7
+Sony PLAYSTATION(R)3 Controller: Mapping b7.0 to a6
+Sony PLAYSTATION(R)3 Controller: Mapping b5.0 to a6
+Sony PLAYSTATION(R)3 Controller: Mapping b4.0 to a7
+Sony PLAYSTATION(R)3 Controller: Mapping b16.0 to b8
+Sony PLAYSTATION(R)3 Controller: Mapping b10.0 to b4
+Sony PLAYSTATION(R)3 Controller: Mapping b1.0 to b9
+Sony PLAYSTATION(R)3 Controller: Mapping b8.0 to a2
+Sony PLAYSTATION(R)3 Controller: Mapping a0.0 to a0
+Sony PLAYSTATION(R)3 Controller: Mapping a1.0 to a1
+Sony PLAYSTATION(R)3 Controller: Mapping b11.0 to b5
+Sony PLAYSTATION(R)3 Controller: Mapping b2.0 to b10
+Sony PLAYSTATION(R)3 Controller: Mapping b9.0 to a5
+Sony PLAYSTATION(R)3 Controller: Mapping a2.0 to a3
+Sony PLAYSTATION(R)3 Controller: Mapping a3.0 to a4
+Sony PLAYSTATION(R)3 Controller: Mapping b3.0 to b7
+Sony PLAYSTATION(R)3 Controller: Mapping b15.0 to b2
+Sony PLAYSTATION(R)3 Controller: Mapping b12.0 to b3
+Assigning joystick 1
+Using TensorFlow backend.
+I tensorflow/stream_executor/dso_loader.cc:128] successfully opened CUDA library libcublas.so locally
+I tensorflow/stream_executor/dso_loader.cc:128] successfully opened CUDA library libcudnn.so locally
+I tensorflow/stream_executor/dso_loader.cc:128] successfully opened CUDA library libcufft.so locally
+I tensorflow/stream_executor/dso_loader.cc:128] successfully opened CUDA library libcuda.so.1 locally
+I tensorflow/stream_executor/dso_loader.cc:128] successfully opened CUDA library libcurand.so locally
+I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:937] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+I tensorflow/core/common_runtime/gpu/gpu_device.cc:885] Found device 0 with properties: 
+name: GeForce GTX 1070
+major: 6 minor: 1 memoryClockRate (GHz) 1.683
+pciBusID 0000:01:00.0
+Total memory: 7.92GiB
+Free memory: 7.11GiB
+I tensorflow/core/common_runtime/gpu/gpu_device.cc:906] DMA: 0 
+I tensorflow/core/common_runtime/gpu/gpu_device.cc:916] 0:   Y 
+I tensorflow/core/common_runtime/gpu/gpu_device.cc:975] Creating TensorFlow device (/gpu:0) -> (device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0)
+____________________________________________________________________________________________________
+Layer (type)                     Output Shape          Param #     Connected to                     
+====================================================================================================
+start (InputLayer)               (None, 160, 320, 3)   0                                            
+____________________________________________________________________________________________________
+crop (Cropping2D)                (None, 70, 320, 3)    0           start[0][0]                      
+____________________________________________________________________________________________________
+normalize (Lambda)               (None, 70, 320, 3)    0           crop[0][0]                       
+____________________________________________________________________________________________________
+dropout_0 (Dropout)              (None, 70, 320, 3)    0           normalize[0][0]                  
+____________________________________________________________________________________________________
+conv_5_1 (Convolution2D)         (None, 35, 160, 24)   1824        dropout_0[0][0]                  
+____________________________________________________________________________________________________
+conv_5_2 (Convolution2D)         (None, 18, 80, 36)    21636       conv_5_1[0][0]                   
+____________________________________________________________________________________________________
+conv_5_3 (Convolution2D)         (None, 9, 40, 48)     43248       conv_5_2[0][0]                   
+____________________________________________________________________________________________________
+conv_3_1 (Convolution2D)         (None, 7, 38, 64)     27712       conv_5_3[0][0]                   
+____________________________________________________________________________________________________
+conv_3_2 (Convolution2D)         (None, 5, 36, 64)     36928       conv_3_1[0][0]                   
+____________________________________________________________________________________________________
+flatten (Flatten)                (None, 11520)         0           conv_3_2[0][0]                   
+____________________________________________________________________________________________________
+dense_1 (Dense)                  (None, 100)           1152100     flatten[0][0]                    
+____________________________________________________________________________________________________
+batchnormalization_1 (BatchNorma (None, 100)           400         dense_1[0][0]                    
+____________________________________________________________________________________________________
+activation_1 (Activation)        (None, 100)           0           batchnormalization_1[0][0]       
+____________________________________________________________________________________________________
+dropout_1 (Dropout)              (None, 100)           0           activation_1[0][0]               
+____________________________________________________________________________________________________
+dense_2 (Dense)                  (None, 50)            5050        dropout_1[0][0]                  
+____________________________________________________________________________________________________
+batchnormalization_2 (BatchNorma (None, 50)            200         dense_2[0][0]                    
+____________________________________________________________________________________________________
+activation_2 (Activation)        (None, 50)            0           batchnormalization_2[0][0]       
+____________________________________________________________________________________________________
+dropout_2 (Dropout)              (None, 50)            0           activation_2[0][0]               
+____________________________________________________________________________________________________
+dense_3 (Dense)                  (None, 10)            510         dropout_2[0][0]                  
+____________________________________________________________________________________________________
+batchnormalization_3 (BatchNorma (None, 10)            40          dense_3[0][0]                    
+____________________________________________________________________________________________________
+activation_3 (Activation)        (None, 10)            0           batchnormalization_3[0][0]       
+____________________________________________________________________________________________________
+dropout_3 (Dropout)              (None, 10)            0           activation_3[0][0]               
+____________________________________________________________________________________________________
+steering_prediction (Dense)      (None, 1)             11          dropout_3[0][0]                  
+====================================================================================================
+Total params: 1,289,659
+Trainable params: 1,289,339
+Non-trainable params: 320
+____________________________________________________________________________________________________
+(5336) wsgi starting up on http://0.0.0.0:4567
+(5336) accepted ('127.0.0.1', 37321)
+connect  6d3633123fad4d5e92fc958eb51b63c7
+DISconnect 3)    0.300    -0.120609
+127.0.0.1 - - [26/Feb/2017 10:50:07] "GET /socket.io/?EIO=4&transport=websocket HTTP/1.1" 200 0 41.095558
+wsgi exiting
+(5336) wsgi exited, is_accepting=True
