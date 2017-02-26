@@ -43,7 +43,7 @@ def telemetry(sid, data):
     steering_angle = float(model.predict(transformed_image_array, batch_size=1))
     # The driving model currently just outputs a constant throttle. Feel free to edit this.
     throttle = 0.3
-    print(steering_angle, throttle)
+    print('{shape} {speed:8.3f} {steer:12.6f}'.format(speed=throttle, shape=image_array.shape, steer=steering_angle), end='\r', flush=True)
     send_control(steering_angle, throttle)
 
 
@@ -72,6 +72,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model = load_model(args.model)
+    model.summary()
 
     # wrap Flask application with engineio's middleware
     app = socketio.Middleware(sio, app)
