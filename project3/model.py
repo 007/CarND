@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-AUGMENT_ANGLE = 0.4 # angle offset for L/R images
+AUGMENT_ANGLE = 0.33 # angle offset for L/R images
 BATCH_SIZE = 512
-EPOCHS = 50
+EPOCHS = 10
 INPUT_SHAPE = (160,320,3) # TF ordering, not TH ordering - all class docs seem to get this wrong?
 LEARNING_RATE = 0.0001
 
@@ -55,11 +55,15 @@ def driving_model(input_shape):
         model.add(Convolution2D(64, 3, 3, name='conv_3_1'))
         model.add(Convolution2D(64, 3, 3, name='conv_3_2'))
 
-        model.add(Dropout(0.6))
         model.add(Flatten(name='flatten'))
 
+        model.add(Dropout(0.5))
         model.add(Dense(100, activation='elu', name='fc_1'))
+
+        model.add(Dropout(0.5))
         model.add(Dense(50, activation='elu', name='fc_2'))
+
+        model.add(Dropout(0.5))
         model.add(Dense(10, activation='elu', name='fc_3'))
 
         model.add(Dense(1, name='steering_prediction'))
@@ -159,7 +163,7 @@ def train_model():
         validation_data=validation_generator,
         nb_epoch=EPOCHS,
         callbacks=[checkpoint],
-        verbose=2,
+    #    verbose=2,
     )
     train.save('xmodel.h5')
 
