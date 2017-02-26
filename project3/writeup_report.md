@@ -24,6 +24,10 @@ The goals / steps of this project are the following:
 [image6]: ./examples/placeholder_small.png "Normal Image"
 [image7]: ./examples/placeholder_small.png "Flipped Image"
 
+[recovery-animation]: ./sample/recovery-sample.gif "Recovery data animation"
+[sharp-turn]: ./sample/center_2017_02_25_15_01_04_164.jpg "Normal Image"
+[sharp-turn-flip]: ./sample/xenter_2017_02_25_15_01_04_164.jpg "Flipped Image"
+
 ## Rubric Points
 ###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
 
@@ -133,9 +137,18 @@ Training data was generated several ways. After the class data turned out to be 
 
 With the game controller, I was able to drive efficiently and record useful data. Using a PS3 controller allowed me to get both analog input (vs digital of keyboard) and smooth and simple input (vs cumbersome mouse). The recovery dataset ended up being much more useful than the default data, since it eliminated the "make a mistake" part of the data, so the system could train only on the "correct a mistake" version.
 
+![alt text][recovery-animation]
+
+
 The recorded data was in good form, but wouldn't be sufficient for training without augmentation. The steering data would be biased to one side (whichever direction the car was going) on anything but perfect data. To eliminate this bias (and to get double the training data "for free") I added a second copy of each training sample with a horizontal flip. The steering data for the second copy was likewise negated to match. This eliminates any bias, since the average between any two samples `X` and `-X` is zero.
 
-<sample images here>
+
+Sample image - steering angle `0.6961063`
+![alt text][sharp-turn]
+
+Augmented (horizontal flip) - steering angle `-0.6961063`
+![alt_text][sharp-turn-flip]
+
 
 
 
