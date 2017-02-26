@@ -31,7 +31,7 @@ The goals / steps of this project are the following:
 
 ### Required Files
 
-####1. The submission includes a model.py file, drive.py, model.h5 a writeup report and video.mp4.
+####1. Required files for submission
 
 My project includes the following files:
 * [model.py](model.py) containing the script to create and train the model
@@ -40,15 +40,20 @@ My project includes the following files:
 * [writeup_report.md](writeup_report.md) (this document) summarizing the results
 * [video.mp4](video.mp4) displaying self-driving performance
 
-####2. Submission includes functional code
-Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
-```sh
+
+### Quality of Code
+
+####1. Code functionality
+
+Using the Udacity provided simulator and my `drive.py` file, the car can be driven autonomously around the track by executing
+```bash
 python drive.py model.h5
 ```
 
-####3. Submission code is usable and readable
+####2. Code usability and legibility
 
-The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
+The `model.py` file contains the code for training and saving the convolution neural network. It uses a Python generator for training data and a `fit_generator` for the Keras input. The file contains comments to explain how the code works, and the code is factored into functions where appropriate.
+
 
 ###Model Architecture and Training Strategy
 
@@ -108,11 +113,36 @@ The model used an [Adam optimizer](http://sebastianruder.com/optimizing-gradient
 
 ####4. Appropriate training data
 
-Training data was generated several ways. Initially I used the class data as provided from Udacity. This turned out to be less than useful, as it combined regular driving with intentional mistakes and correction. I ended up recording my own training data in four distinct batches. The first used keyboard input, but ended up being too noisy with hard transitions between zero steering and over-correction. I then switched to the beta simulator for the second batch, and attempted to create data with the mouse input. The data itself was smoother, but the interface was cumbersome and I ended up including a lot of mistakes due to my lack of finesse with the steering controls.
+Training data was chosen with care. The orignal training data presented from the course notes had undesirable characteristics, namely it combined regular driving with intentional mistakes and correction. My training data was generated as smooth lane-centered driving, with a smaller set of augmentation data for correction _without_ the intentional mistakes.
 
-Finally I ended up using a PS3 controller to get both analog input (vs digital of keyboard) and smooth and simple input (vs cumbersome mouse). With the game controller, I was able to drive efficiently and record useful data. The third batch of data was my primary training input, smooth and consistent driving centered in the lane for several laps in both directions around the track. Batch four was my correction data, where I would drive as before, but switch recording off and back on as I made intentional mistakes and then corrected them. This recovery dataset ended up being much more useful than the default data, since it eliminated the "make a mistake" part of the data, so the system could train only on the "correct a mistake" version.
+### Architecture and Training Documentation
 
-This step ended up being the **most** important part of the entire project. Regardless of my experiments in the model / architecture section below, running with "bad" data made the results much more erratic and less consistent across even small changes.
+####1. Solution Design Documentation
+
+####2. Model Architecture Documentation
+
+####3. Training Dataset and Training Process Documentation
+
+This step ended up being the **most** important part of the entire project. Regardless of my experiments in the model / architecture sections, running with "bad" data made the results much more erratic and less consistent across even small changes.
+
+Training data was generated several ways. After the class data turned out to be less than useful, I ended up recording my own training data in four distinct batches:
+ * The first used keyboard input, but ended up being too noisy with hard transitions between zero steering and over-correction.
+ * I then switched to the beta simulator for the second batch, and attempted to create data with the mouse input. The data itself was smoother, but the interface was cumbersome and I ended up including a lot of mistakes due to my lack of skill with the steering controls.
+ * The third batch of data was my primary training input, smooth and consistent driving with a game controller, centered in the lane for several laps in both directions around the track.
+ * Batch four was my correction data, where I would drive as before, but switch recording off and back on as I made intentional mistakes and then corrected them.
+
+With the game controller, I was able to drive efficiently and record useful data. Using a PS3 controller allowed me to get both analog input (vs digital of keyboard) and smooth and simple input (vs cumbersome mouse). The recovery dataset ended up being much more useful than the default data, since it eliminated the "make a mistake" part of the data, so the system could train only on the "correct a mistake" version.
+
+The recorded data was in good form, but wouldn't be sufficient for training without augmentation. The steering data would be biased to one side (whichever direction the car was going) on anything but perfect data. To eliminate this bias (and to get double the training data "for free") I added a second copy of each training sample with a horizontal flip. The steering data for the second copy was likewise negated to match. This eliminates any bias, since the average between any two samples `X` and `-X` is zero.
+
+<sample images here>
+
+
+
+
+
+
+
 
 ###Model Architecture and Training Strategy
 
