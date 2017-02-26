@@ -61,9 +61,9 @@ The `model.py` file contains the code for training and saving the convolution ne
 
 My model implements the [NVIDIA SDC architecture](https://devblogs.nvidia.com/parallelforall/deep-learning-self-driving-cars/) with a few modifications.
 
-It first employs cropping in-model, as recommended in the associated paper. I found that this does provide for a simpler workflow and faster round-trip time for experiments. I chose to use the equivalent of the [Comma.ai normalization](https://github.com/commaai/research/blob/master/train_steering_model.py#L28-L30) to a range of -1..1 instead of the standard `x / 255` range of 0..1. The model uses [3 layers](model.py#L59-61) of 5x5 convolution, each with a stride of 2. They vary in depth, increasing from 24 to 36 to 48. Then there are [two identical layers](model.py#L63-64), 3x3 convolution with stride 1 and depth 64.
+It first employs cropping in-model, as recommended in the associated paper. I found that this does provide for a simpler workflow and faster round-trip time for experiments. I chose to use the equivalent of the [Comma.ai normalization](https://github.com/commaai/research/blob/master/train_steering_model.py#L28-L30) to a range of -1..1 instead of the standard `x / 255` range of 0..1. The model uses [3 layers](model.py#L59-L61) of 5x5 convolution, each with a stride of 2. They vary in depth, increasing from 24 to 36 to 48. Then there are [two identical layers](model.py#L63-L64), 3x3 convolution with stride 1 and depth 64.
 
-After flattening, there are [3 fully-connected layers](model.py#68-70) of the form (`fc / bn / elu / drop`)[model.py#L35-38]. The FC layer depths are 100, 50 and 10, respectively. [Batch normalization](https://arxiv.org/abs/1502.03167) is employed between the FC layer and the activation function to provide more consistent values. The activation function is exponential rectified linear unit (ELU) versus the usual ReLU.
+After flattening, there are [3 fully-connected layers](model.py#L68-L70) of the form [`fc / bn / elu / drop`](model.py#L35-L38). The FC layer depths are 100, 50 and 10, respectively. [Batch normalization](https://arxiv.org/abs/1502.03167) is employed between the FC layer and the activation function to provide more consistent values. The activation function is exponential rectified linear unit (ELU) versus the usual ReLU.
 
 Model summary below:
 
@@ -105,7 +105,7 @@ Model summary below:
 
 The model contains dropout layers in order to reduce overfitting. There is a dropout from the [initial input](model.py#L57), as well as [individual dropout](model.py#L38) between each FC layer.
 
-The model was [trained](model.py#201-202) and [validated](model.py#203) on different data sets to ensure that the model was not overfitting. The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+The model was [trained](model.py#L201-L202) and [validated](model.py#L203) on different data sets to ensure that the model was not overfitting. The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
 ####3. Model parameter tuning
 
