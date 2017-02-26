@@ -1,6 +1,9 @@
 import argparse
+from datetime import datetime
+
 import base64
 import json
+import os
 import sys
 
 import numpy as np
@@ -45,12 +48,18 @@ def telemetry(sid, data):
     throttle = 0.3
     print('{shape} {speed:8.3f} {steer:12.6f}'.format(speed=throttle, shape=image_array.shape, steer=steering_angle), end='\r', flush=True)
     send_control(steering_angle, throttle)
+    # save frame
+    if args.image_folder != '':
+        timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
+        image_filename = os.path.join('wtfm8', timestamp)
+        image.save('{}.jpg'.format(image_filename))
 
 
 @sio.on('disconnect')
 def disconnect(environ):
     print("DISconnect ")
     sys.exit()
+
 
 @sio.on('connect')
 def connect(sid, environ):
@@ -67,8 +76,18 @@ def send_control(steering_angle, throttle):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Remote Driving')
-    parser.add_argument('model', type=str,
-    help='Path to model definition h5. Model should be on the same path.')
+    parser.add_argument(
+        'model',
+        type=str,
+        help='Path to model h5 file. Model should be on the same path.'
+    )
+    parser.add_argument(
+        'image_folder',
+        type=str,
+        nargs='?',
+        default='',
+        help='Path to image folder. This is where the images from the run will be saved.'
+    )
     args = parser.parse_args()
 
     model = load_model(args.model)
