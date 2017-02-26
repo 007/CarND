@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 AUGMENT_ANGLE = 0.33 # angle offset for L/R images
-BATCH_SIZE = 512
+BATCH_SIZE = 32
 EPOCHS = 10
 INPUT_SHAPE = (160,320,3) # TF ordering, not TH ordering - all class docs seem to get this wrong?
-LEARNING_RATE = 0.0001
+LEARNING_RATE = 0.01
 
-CROP_TOP = 70
+CROP_TOP = 80
 CROP_BOTTOM = 10
 CROP_LEFT = 0
 CROP_RIGHT = 0
@@ -22,7 +22,7 @@ from sklearn.model_selection import train_test_split
 from keras.callbacks import ModelCheckpoint
 from keras.engine.topology import InputLayer
 from keras.layers.convolutional import Cropping2D, Convolution2D
-from keras.layers.core import Dense, Dropout, Flatten, Lambda
+from keras.layers.core import Activation, Dense, Dropout, Flatten, Lambda
 from keras.layers.normalization import BatchNormalization
 from keras.layers.pooling import AveragePooling2D
 from keras.models import Sequential
@@ -41,12 +41,15 @@ def driving_model(input_shape):
 
         # Crop - eliminate as much data as posible before other processing
         model.add(Cropping2D(cropping=CROP_SHAPE, name='crop'))
-        model.add(AveragePooling2D(pool_size=(2,2), name='shrink')) # downsample
+#        model.add(AveragePooling2D(pool_size=(2,2), name='shrink')) # downsample
 
         # NVIDIA architecture
         # From https://devblogs.nvidia.com/parallelforall/deep-learning-self-driving-cars/
         # 1 normalization layer, 5 conv layers, 3 fc layers
         model.add(Lambda(lambda x: (x / 127.5) - 1, name='normalize')) # Normalize
+
+
+        model.add(Dropout(0.2))
 
         model.add(Convolution2D(24, 5, 5, border_mode='same', subsample=(2,2), name='conv_5_1'))
         model.add(Convolution2D(36, 5, 5, border_mode='same', subsample=(2,2), name='conv_5_2'))
@@ -57,14 +60,20 @@ def driving_model(input_shape):
 
         model.add(Flatten(name='flatten'))
 
-        model.add(Dropout(0.5))
-        model.add(Dense(100, activation='elu', name='fc_1'))
+        model.add(Dense(100, name='fc_1'))
+        model.add(BatchNormalization())
+        model.add(Activation('elu'))
+        model.add(Dropout(0.2))
 
-        model.add(Dropout(0.5))
-        model.add(Dense(50, activation='elu', name='fc_2'))
+        model.add(Dense(50, name='fc_2'))
+        model.add(BatchNormalization())
+        model.add(Activation('elu'))
+        model.add(Dropout(0.2))
 
-        model.add(Dropout(0.5))
-        model.add(Dense(10, activation='elu', name='fc_3'))
+        model.add(Dense(10, name='fc_3'))
+        model.add(BatchNormalization())
+        model.add(Activation('elu'))
+        model.add(Dropout(0.2))
 
         model.add(Dense(1, name='steering_prediction'))
 
