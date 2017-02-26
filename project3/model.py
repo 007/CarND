@@ -89,14 +89,15 @@ def get_image(name):
         return img_to_array(load_img(name))
 
 
-def count_samples(samples):
+def count_samples(samples, augment=False):
     generator_count = 0
     for row in samples:
         generator_count = generator_count + 2
-        if 'left' in row and len(row['left']) > 0:
-            generator_count = generator_count + 2
-        if 'right' in row and len(row['right']) > 0:
-            generator_count = generator_count + 2
+        if augment:
+            if 'left' in row and len(row['left']) > 0:
+                generator_count = generator_count + 2
+            if 'right' in row and len(row['right']) > 0:
+                generator_count = generator_count + 2
     return generator_count
 
 def augmentation_helper(row, index, offset_multiplier=1.0):
@@ -143,12 +144,12 @@ def generator(samples, batch_size=32, augment=False):
 
 def train_model():
     # compile and train the model using the generator function
-    train_generator = generator(train_samples, batch_size=BATCH_SIZE, augment = True)
+    train_generator = generator(train_samples, batch_size=BATCH_SIZE, augment=True)
     validation_generator = generator(validation_samples, batch_size=BATCH_SIZE)
 
     train = driving_model(INPUT_SHAPE)
-    train_count = count_samples(train_samples)
-    valid_count = len(validation_samples) * 2 # augmentation_helper flips center channel even without L/R augmentation
+    train_count = count_samples(train_samples, augment=True)
+    valid_count = count_samples(validation_samples)
 
     print('-=' * 40)
     print('  Training samples: {}'.format(len(train_samples)))
