@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-AUGMENT_ANGLE = 0.33 # angle offset for L/R images
+AUGMENT_ANGLE = 0.3 # angle offset for L/R images
 BATCH_SIZE = 32
 EPOCHS = 25
 INPUT_SHAPE = (160,320,3) # TF ordering, not TH ordering - all class docs seem to get this wrong?
