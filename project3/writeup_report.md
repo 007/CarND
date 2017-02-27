@@ -131,6 +131,7 @@ Model summary below:
 | **Non-trainable params** | **320** |
 | **Total params** | **1,289,659** |
 
+_Trainable parameters include all FC layer interconnections and convolution outputs. Non-trainable parameters are due to batch normalizaiton steps._
 
 ####3. Training Dataset and Training Process Documentation
 
@@ -164,13 +165,8 @@ Data was also sourced from the corresponding `left` and `right` images, and a co
 
 These two were subsequently augmented further with horizontal flipping. With all of the above processing, each input sample row yielded 6 different training examples.
 
-----
+All initial training data was shuffled, then fed into the generator for augmentation. A batch size of 32 was requested via the model parameters, but it actually got 6x as much augmented data. I chose a small batch size for this reason, as I was overrunning available memory with larger batches because of the expansion factor. I believe the problem could be solved with a double-generator, where the too-large output could be batched in another generator, but I didn't puruse this. With smaller requested batch sizes the model still performed well.
 
-Etc ....
+In all I used 9,351 input samples, which ended up as 56,106 training samples after 6x augmentation. I used the existing class dataset for validation, so had 16,072 samples for validation - about 30% of our training set size after augmentation.
 
-After the collection process, I had X number of data points. I then preprocessed this data by ...
-
-
-I finally randomly shuffled the data set and put Y% of the data into a validation set. 
-
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+Manual experimentation showed that 25 epochs was a reasonable stopping point. After 5 epochs both loss and validation loss plateaued. Testing after 5 showed that the model still swerved more than would be acceptable. Running up to 50 epochs showed only 5 improvements in validation loss above 25, and only reduced error rate by 0.3%.
