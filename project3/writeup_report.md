@@ -25,10 +25,10 @@ The goals / steps of this project are the following:
 [image7]: ./examples/placeholder_small.png "Flipped Image"
 
 [recovery-animation]: ./sample/recovery-sample.gif "Recovery data animation"
-[sharp-turn]: ./sample/center_2017_02_25_15_01_04_164.jpg "normal - angle 0.6961063"
-[sharp-turn-flip]: ./sample/xenter_2017_02_25_15_01_04_164.jpg "flipped - angle -0.6961063"
-[left-sample]: ./sample/left_2017_02_25_15_01_04_164.jpg "left - angle 0.9961063"
-[right-sample]: ./sample/right_2017_02_25_15_01_04_164.jpg "right - angle 0.3961063"
+[sharp-turn]: ./sample/center_2017_02_25_15_01_04_164.jpg "normal"
+[sharp-turn-flip]: ./sample/xenter_2017_02_25_15_01_04_164.jpg "flipped"
+[left-sample]: ./sample/left_2017_02_25_15_01_04_164.jpg "left"
+[right-sample]: ./sample/right_2017_02_25_15_01_04_164.jpg "right"
 
 ## Rubric Points
 ###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -145,11 +145,11 @@ With the game controller, I was able to drive efficiently and record useful data
 The recorded data was in good form, but wouldn't be sufficient for training without augmentation. The steering data would be biased to one side (whichever direction the car was going) on anything but perfect data. To eliminate this bias (and to get double the training data "for free") I added a second copy of each training sample with a horizontal flip. The steering data for the second copy was likewise negated to match. This eliminates any bias, since the average between any two samples `X` and `-X` is zero.
 
 
-Sample image - steering angle `0.6961063`
+Sample image
 
 ![alt text][sharp-turn]
 
-Augmented (horizontal flip) - steering angle `-0.6961063`
+Augmented (horizontal flip)
 
 ![alt_text][sharp-turn-flip]
 
@@ -159,6 +159,7 @@ Data was also sourced from the corresponding `left` and `right` images, and a co
 ![alt_text][left-sample]
 ![alt_text][right-sample]
 
+These two were additionally augmented with horizontal flipping. With all of the above, each input sample row yielded 6 different training examples.
 
 
 
