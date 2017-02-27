@@ -16,14 +16,6 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/placeholder.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
-
 [recovery-animation]: ./sample/recovery-sample.gif "Recovery data animation"
 [sharp-turn]: ./sample/center_2017_02_25_15_01_04_164.jpg "normal"
 [sharp-turn-flip]: ./sample/xenter_2017_02_25_15_01_04_164.jpg "flipped"
@@ -71,6 +63,30 @@ It first employs cropping in-model, as recommended in the associated paper. I fo
 
 After flattening, there are [3 fully-connected layers](model.py#L68-L70) of the form [`fc / bn / elu / drop`](model.py#L35-L38). The FC layer depths are 100, 50 and 10, respectively. [Batch normalization](https://arxiv.org/abs/1502.03167) is employed between the FC layer and the activation function to provide more consistent values. The activation function is exponential rectified linear unit (ELU) versus the usual ReLU.
 
+---
+
+
+####2. Attempts to reduce overfitting in the model
+
+The model contains dropout layers in order to reduce overfitting. There is a dropout from the [initial input](model.py#L57), as well as [individual dropout](model.py#L38) between each FC layer.
+
+The model was [trained](model.py#L201-L202) and [validated](model.py#L203) on different data sets to ensure that the model was not overfitting. The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+
+####3. Model parameter tuning
+
+The model used an [Adam optimizer](http://sebastianruder.com/optimizing-gradient-descent/index.html#adam). The learning rate was set much higher than the initial / default value due to use of multiple dropout layers, as recommended in the original [dropout paper](http://www.jmlr.org/papers/v15/srivastava14a.html). Since Adam is a self-tuning optimizer, this had less effect than it would have with SGD or similar.
+
+####4. Appropriate training data
+
+Training data was chosen with care. The orignal training data presented from the course notes had undesirable characteristics, namely it combined regular driving with intentional mistakes and correction. My training data was generated as smooth lane-centered driving, with a smaller set of augmentation data for correction _without_ the intentional mistakes.
+
+### Architecture and Training Documentation
+
+####1. Solution Design Documentation
+
+####2. Model Architecture Documentation
+See [model architecutre description](#1-an-appropriate-model-architecture-has-been-employed) above.
+
 Model summary below:
 
 | Layer | Type                    | Output Shape         | Params    | Connected to              |
@@ -104,28 +120,6 @@ Model summary below:
 | **Non-trainable params** | **320** |
 | **Total params** | **1,289,659** |
 
----
-
-
-####2. Attempts to reduce overfitting in the model
-
-The model contains dropout layers in order to reduce overfitting. There is a dropout from the [initial input](model.py#L57), as well as [individual dropout](model.py#L38) between each FC layer.
-
-The model was [trained](model.py#L201-L202) and [validated](model.py#L203) on different data sets to ensure that the model was not overfitting. The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
-
-####3. Model parameter tuning
-
-The model used an [Adam optimizer](http://sebastianruder.com/optimizing-gradient-descent/index.html#adam). The learning rate was set much higher than the initial / default value due to use of multiple dropout layers, as recommended in the original [dropout paper](http://www.jmlr.org/papers/v15/srivastava14a.html). Since Adam is a self-tuning optimizer, this had less effect than it would have with SGD or similar.
-
-####4. Appropriate training data
-
-Training data was chosen with care. The orignal training data presented from the course notes had undesirable characteristics, namely it combined regular driving with intentional mistakes and correction. My training data was generated as smooth lane-centered driving, with a smaller set of augmentation data for correction _without_ the intentional mistakes.
-
-### Architecture and Training Documentation
-
-####1. Solution Design Documentation
-
-####2. Model Architecture Documentation
 
 ####3. Training Dataset and Training Process Documentation
 
@@ -141,9 +135,7 @@ With the game controller, I was able to drive efficiently and record useful data
 
 ![alt text][recovery-animation]
 
-
 The recorded data was in good form, but wouldn't be sufficient for training without augmentation. The steering data would be biased to one side (whichever direction the car was going) on anything but perfect data. To eliminate this bias (and to get double the training data "for free") I added a second copy of each training sample with a horizontal flip. The steering data for the second copy was likewise negated to match. This eliminates any bias, since the average between any two samples `X` and `-X` is zero.
-
 
 Sample image
 
@@ -154,15 +146,12 @@ Augmented (horizontal flip)
 ![alt_text][sharp-turn-flip]
 
 
-Data was also sourced from the corresponding `left` and `right` images, and a constant angle was added to each to simulate recovery data. If we assume the `center` image corresponds to the `steering` data, then the `left` image should be the steering angle plus some small amount, and the `right` image should be the steering angle minus some small amount.
+Data was also sourced from the corresponding `left` and `right` images, and a constant angle was added to each to simulate recovery data. If we assume the `center` image corresponds to the `steering` data, then the `left` image should be the steering angle plus some small amount, and the `right` image should be the steering angle minus some small amount. No effort was made to ennsure the result was valid; it is desireable for the driving model to saturate for values outside its expected range, and that matches the behavior of the simulator.
 
 ![alt_text][left-sample]
 ![alt_text][right-sample]
 
-These two were additionally augmented with horizontal flipping. With all of the above, each input sample row yielded 6 different training examples.
-
-
-
+These two were subsequently augmented further with horizontal flipping. With all of the above processing, each input sample row yielded 6 different training examples.
 
 
 ###Model Architecture and Training Strategy
