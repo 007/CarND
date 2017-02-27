@@ -63,9 +63,6 @@ It first employs cropping in-model, as recommended in the associated paper. I fo
 
 After flattening, there are [3 fully-connected layers](model.py#L68-L70) of the form [`fc / bn / elu / drop`](model.py#L35-L38). The FC layer depths are 100, 50 and 10, respectively. [Batch normalization](https://arxiv.org/abs/1502.03167) is employed between the FC layer and the activation function to provide more consistent values. The activation function is exponential rectified linear unit (ELU) versus the usual ReLU.
 
----
-
-
 ####2. Attempts to reduce overfitting in the model
 
 The model contains dropout layers in order to reduce overfitting. There is a dropout from the [initial input](model.py#L57), as well as [individual dropout](model.py#L38) between each FC layer.
@@ -83,6 +80,20 @@ Training data was chosen with care. The orignal training data presented from the
 ### Architecture and Training Documentation
 
 ####1. Solution Design Documentation
+
+The model architecture was selected from existing recommendations and existing success with SDC activity. I started and ended up with the NVIDIA DAVE2 model, but considered the Comma.ai model, Inception-based models, several ND013 references and even some of my own designs before ending up where I started.
+
+Each type of model started with convolutional layers as feature detectors. That makes sense in our case as well, since we want some kind of feature detection for drivable surface, road edges, curve indicators, warning signs, etc. Training and validation data were split from the class data file, with 10% of shuffled data being reserved for validation.
+
+Every model failed for me, some sooner than others. With the original data, the best model I evaluated got through the first curve and across the bridge before detouring onto the dirt road. Most models veered wildly just on the first track section, and ended up oscilating themselves over the curb before the first turn.
+
+It turns out that my choice of image size reduction by average pooling was devestating for steering representation. My attempt to reduce the network size ended up reducing the accuracy so much that no model could navigate properly. It was only after failing on most models that I went back to the simplest concepts and a fresh, clean dataset (see [dataset info](#3-training-dataset-and-training-process-documentation) below).
+
+I didn't need a test dataset, so I used my "clean" data as training input, and used the class data as the validation set. With even a simple architecture I could see similar driving quality to my known-good architecture performance after removing the downsizing operation. I added back the full NVIDIA model and got to acceptable performance.
+
+To get past the full course circuit, I added dropout between FC layers and batch normalizaiton within the FC/activation units. That resulted in much lower validation error via MSE within a few epochs than previous runs.
+
+With all of these improvements in place, I could finally round the troublesome corners and complete a lap without wobbling.
 
 ####2. Model Architecture Documentation
 See [model architecutre description](#1-an-appropriate-model-architecture-has-been-employed) above.
@@ -123,7 +134,7 @@ Model summary below:
 
 ####3. Training Dataset and Training Process Documentation
 
-This step ended up being the **most** important part of the entire project. Regardless of my experiments in the model / architecture sections, running with "bad" data made the results much more erratic and less consistent across even small changes.
+This step ended up being the **most** important part of the entire project. Regardless of my experiments in the model / architecture sections, running with "bad" data made the results much more erratic and less consistent across even small changes, and even when the architecture was good enough to complete the drive given better data.
 
 Training data was generated several ways. After the class data turned out to be less than useful, I ended up recording my own training data in four distinct batches:
  * The first used keyboard input, but ended up being too noisy with hard transitions between zero steering and over-correction.
@@ -146,58 +157,14 @@ Augmented (horizontal flip)
 ![alt_text][sharp-turn-flip]
 
 
-Data was also sourced from the corresponding `left` and `right` images, and a constant angle was added to each to simulate recovery data. If we assume the `center` image corresponds to the `steering` data, then the `left` image should be the steering angle plus some small amount, and the `right` image should be the steering angle minus some small amount. No effort was made to ennsure the result was valid; it is desireable for the driving model to saturate for values outside its expected range, and that matches the behavior of the simulator.
+Data was also sourced from the corresponding `left` and `right` images, and a constant angle (0.3) was added to each to simulate recovery data. If we assume the `center` image corresponds to the `steering` data, then the `left` image should be the steering angle plus some small amount, and the `right` image should be the steering angle minus some small amount. No effort was made to ennsure the result was valid; it is desireable for the driving model to saturate for values outside its expected range, and that matches the behavior of the simulator.
 
 ![alt_text][left-sample]
 ![alt_text][right-sample]
 
 These two were subsequently augmented further with horizontal flipping. With all of the above processing, each input sample row yielded 6 different training examples.
 
-
-###Model Architecture and Training Strategy
-
-####1. Solution Design Approach
-
-The overall strategy for deriving a model architecture was to ...
-
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
-
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
-
-To combat the overfitting, I modified the model so that ...
-
-Then I ... 
-
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
-
-At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
-
-####2. Final Model Architecture
-
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
-
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
-
-![alt text][image1]
-
-####3. Creation of the Training Set & Training Process
-
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
-
-![alt text][image2]
-
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
-
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
-
-Then I repeated this process on track two in order to get more data points.
-
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
-
-![alt text][image6]
-![alt text][image7]
+----
 
 Etc ....
 
