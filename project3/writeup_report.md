@@ -25,8 +25,10 @@ The goals / steps of this project are the following:
 [image7]: ./examples/placeholder_small.png "Flipped Image"
 
 [recovery-animation]: ./sample/recovery-sample.gif "Recovery data animation"
-[sharp-turn]: ./sample/center_2017_02_25_15_01_04_164.jpg "Normal Image"
-[sharp-turn-flip]: ./sample/xenter_2017_02_25_15_01_04_164.jpg "Flipped Image"
+[sharp-turn]: ./sample/center_2017_02_25_15_01_04_164.jpg "normal - angle 0.6961063"
+[sharp-turn-flip]: ./sample/xenter_2017_02_25_15_01_04_164.jpg "flipped - angle -0.6961063"
+[left-sample]: ./sample/left_2017_02_25_15_01_04_164.jpg "left - angle 0.9961063"
+[right-sample]: ./sample/right_2017_02_25_15_01_04_164.jpg "right - angle 0.3961063"
 
 ## Rubric Points
 ###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -144,13 +146,18 @@ The recorded data was in good form, but wouldn't be sufficient for training with
 
 
 Sample image - steering angle `0.6961063`
+
 ![alt text][sharp-turn]
 
 Augmented (horizontal flip) - steering angle `-0.6961063`
+
 ![alt_text][sharp-turn-flip]
 
 
+Data was also sourced from the corresponding `left` and `right` images, and a constant angle was added to each to simulate recovery data. If we assume the `center` image corresponds to the `steering` data, then the `left` image should be the steering angle plus some small amount, and the `right` image should be the steering angle minus some small amount.
 
+![alt_text][left-sample]
+![alt_text][right-sample]
 
 
 
