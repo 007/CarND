@@ -7,21 +7,10 @@ import matplotlib.image as mpimg
 import glob
 import json
 
+from local_debug_helper import imgprint, imgprint_h
+
 CHESS_X = 9 # inner-horizontal corners on calibration images
 CHESS_Y = 6 # inner-vertical corners on calibration images
-
-# helper function for debugging - write image to plot and (blocking) show immediately
-def imgprint(img):
-    plt.imshow(img)
-    plt.show()
-
-def imgprint_h(img_arr):
-    plot_count = len(img_arr)
-    fig = plt.figure()
-    for i in range(plot_count):
-        x = fig.add_subplot(1, plot_count, i + 1)
-        plt.imshow(img_arr[i])
-    plt.show()
 
 def save_camera_calibration(mtx, dist):
     # save to camera_calibration.json
