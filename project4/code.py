@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 
-import numpy as np
 import cv2
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import glob
 import json
+import numpy as np
 
 from local_debug_helper import imgprint, imgprint_h
 
