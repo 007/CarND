@@ -20,6 +20,7 @@ def save_camera_calibration(mtx, dist):
 
 def load_camera_calibration():
     # load from camera_calibration.json
+    # TODO: cache this after first load?
     with open('camera_calibration.json', 'r') as f:
         json_data = json.load(f)
     # reconstitute as np arrays vs lists
@@ -46,24 +47,25 @@ def compute_calibration(file_array):
     _, mtx, dist, _, _ = cv2.calibrateCamera(obj_points, img_points, calibration_shape, None, None)
 
     save_camera_calibration(mtx, dist)
-    mtx2, dist2 = load_camera_calibration()
-
-    for fname in file_array:
-        print("processing {}".format(fname))
-        img = cv2.imread(fname)
-        dst = cv2.undistort(img, mtx2, dist2, None, mtx2)
-        imgprint_h((img, dst))
-
-
-compute_calibration(glob.glob('./camera_cal/calibration*.jpg'))
-
-
 
 
 """ Apply a distortion correction to raw images. """
+def correct_distortion(img):
+    mtx, dist = load_camera_calibration()
+    return cv2.undistort(img, mtx, dist, None, mtx)
+
 """ Use color transforms, gradients, etc., to create a thresholded binary image. """
 """ Apply a perspective transform to rectify binary image ("birds-eye view"). """
 """ Detect lane pixels and fit to find the lane boundary. """
 """ Determine the curvature of the lane and vehicle position with respect to center. """
 """ Warp the detected lane boundaries back onto the original image. """
 """ Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position. """
+
+if __name__ == '__main__':
+    compute_calibration(glob.glob('./camera_cal/calibration*.jpg'))
+
+    for fname in glob.glob('./camera_cal/calibration*2.jpg'):
+        print("processing {}".format(fname))
+        img = cv2.imread(fname)
+        dst = correct_distortion(img)
+        imgprint_h((img, dst))
