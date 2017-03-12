@@ -62,10 +62,12 @@ def correct_distortion(img):
 """ Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position. """
 
 if __name__ == '__main__':
+    # compute calibration info
     compute_calibration(glob.glob('./camera_cal/calibration*.jpg'))
 
-    for fname in glob.glob('./camera_cal/calibration*2.jpg'):
-        print("processing {}".format(fname))
-        img = cv2.imread(fname)
-        dst = correct_distortion(img)
-        imgprint_h((img, dst))
+    # Write out our sampleimages
+    img = cv2.imread('./camera_cal/calibration2.jpg')
+    dst = correct_distortion(img)
+    cv2.imwrite('./output/calibration_input.jpg', img)
+    cv2.imwrite('./output/calibration_output.jpg', dst)
+
