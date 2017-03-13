@@ -15,3 +15,10 @@ def imgprint_h(img_arr):
         plt.imshow(img_arr[i])
     plt.show()
 
+def channel_images(txt, img):
+    import cv2
+    from subprocess import call
+    print("splitting channels:", txt)
+    for i in range(3):
+        cv2.imwrite('channel.png', img[:,:,i])
+        call(['display', 'channel.png'])
