@@ -54,18 +54,54 @@ def correct_distortion(img):
 
 """ Use color transforms, gradients, etc., to create a thresholded binary image. """
 """ Apply a perspective transform to rectify binary image ("birds-eye view"). """
+def perspective_warp_lane(img):
+    w,h = 1280, 720
+    border = 128
+
+    from_shape = np.float32([
+        [ 595,  450],
+        [ 690,  450],
+        [1035,  675],
+        [ 275,  675],
+        ])
+    to_shape = np.float32([
+        [ border, border ],
+        [w - border, border],
+        [w - border, h - border],
+        [border, h - border],
+        ])
+    img_size = (img.shape[1], img.shape[0])
+    M = cv2.getPerspectiveTransform(from_shape, to_shape)
+    warped = cv2.warpPerspective(img, M, img_size)
+    return warped
+
 """ Detect lane pixels and fit to find the lane boundary. """
 """ Determine the curvature of the lane and vehicle position with respect to center. """
 """ Warp the detected lane boundaries back onto the original image. """
 """ Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position. """
 
-if __name__ == '__main__':
-    # compute calibration info
-    compute_calibration(glob.glob('./camera_cal/calibration*.jpg'))
 
-    # Write out our sampleimages
+def pipeline_init():
+    # skip for now
+    # compute_calibration(glob.glob('./camera_cal/calibration*.jpg'))
     img = cv2.imread('./camera_cal/calibration2.jpg')
     dst = correct_distortion(img)
     cv2.imwrite('./output/calibration_input.jpg', img)
     cv2.imwrite('./output/calibration_output.jpg', dst)
+
+def pipeline(input_image):
+    traffic_image = cv2.imread(input_image)
+
+    corrected = correct_distortion(traffic_image)
+    cv2.imwrite('./output/traffic_calibrated.jpg', corrected)
+    imgprint(corrected)
+
+    warped = perspective_warp_lane(corrected)
+    cv2.imwrite('./output/traffic_perspective.jpg', warped)
+    imgprint(warped)
+
+
+if __name__ == '__main__':
+    pipeline_init()
+    pipeline('test_images/straight_lines2.jpg')
 
