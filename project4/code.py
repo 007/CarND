@@ -53,6 +53,27 @@ def correct_distortion(img):
     return cv2.undistort(img, mtx, dist, None, mtx)
 
 """ Use color transforms, gradients, etc., to create a thresholded binary image. """
+def image_to_threshold(img,  thresh_min=100, thresh_max=999):
+
+    foo = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    bar = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
+
+    # 1) Convert to grayscale
+    # diff saturation channels
+    gray = foo[:,:,1] - bar[:,:,2]
+    # 2) Take the derivative in x
+    sobel = cv2.Sobel(gray, cv2.CV_64F, 1, 0)
+    # 3) Take the absolute value of the derivative or gradient
+    abs_sobel = np.absolute(sobel)
+    # 4) Scale to 8-bit (0 - 255) then convert to type = np.uint8
+    scaled_sobel = np.uint8(255*abs_sobel/np.max(abs_sobel))
+    # 5) Create a mask of 1's where the scaled gradient magnitude is between thresh_min and _max
+    binary_output = np.zeros_like(scaled_sobel)
+    binary_output[(scaled_sobel >= thresh_min) & (scaled_sobel <= thresh_max)] = 1
+    # 6) Return this mask as your binary_output image
+    return binary_output
+
+
 """ Apply a perspective transform to rectify binary image ("birds-eye view"). """
 def perspective_warp_lane(img):
     w,h = 1280, 720
@@ -96,7 +117,11 @@ def pipeline(input_image):
     cv2.imwrite('./output/traffic_calibrated.jpg', corrected)
     imgprint(corrected)
 
-    warped = perspective_warp_lane(corrected)
+    threshold = image_to_threshold(corrected)
+    cv2.imwrite('./output/traffic_tresholded.jpg', threshold)
+    #imgprint(threshold)
+
+    warped = perspective_warp_lane(threshold)
     cv2.imwrite('./output/traffic_perspective.jpg', warped)
     imgprint(warped)
 
