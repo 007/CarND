@@ -53,7 +53,7 @@ def correct_distortion(img):
     return cv2.undistort(img, mtx, dist, None, mtx)
 
 """ Use color transforms, gradients, etc., to create a thresholded binary image. """
-def image_to_threshold(img,  thresh_min=100, thresh_max=999):
+def image_to_threshold(img, thresh_min=100,thresh_max=255):
 
     foo = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     bar = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
@@ -78,19 +78,8 @@ def image_to_threshold(img,  thresh_min=100, thresh_max=999):
 def perspective_warp_lane(img):
     w,h = 1280, 720
     border = 128
-
-    from_shape = np.float32([
-        [ 595,  450],
-        [ 690,  450],
-        [1035,  675],
-        [ 275,  675],
-        ])
-    to_shape = np.float32([
-        [ border, border ],
-        [w - border, border],
-        [w - border, h - border],
-        [border, h - border],
-        ])
+    from_shape = np.float32([ [595, 450], [690, 450], [1050, 675], [275, 675] ])
+    to_shape = np.float32([ [border, border], [w-border, border], [w-border, h-border], [border, h-border] ])
     img_size = (img.shape[1], img.shape[0])
     M = cv2.getPerspectiveTransform(from_shape, to_shape)
     warped = cv2.warpPerspective(img, M, img_size)
@@ -115,7 +104,7 @@ def pipeline(input_image):
 
     corrected = correct_distortion(traffic_image)
     cv2.imwrite('./output/traffic_calibrated.jpg', corrected)
-    imgprint(corrected)
+    #imgprint(corrected)
 
     threshold = image_to_threshold(corrected)
     cv2.imwrite('./output/traffic_tresholded.jpg', threshold)
@@ -124,7 +113,6 @@ def pipeline(input_image):
     warped = perspective_warp_lane(threshold)
     cv2.imwrite('./output/traffic_perspective.jpg', warped)
     imgprint(warped)
-
 
 if __name__ == '__main__':
     pipeline_init()
