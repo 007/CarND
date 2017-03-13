@@ -86,6 +86,18 @@ def perspective_warp_lane(img):
     return warped
 
 """ Detect lane pixels and fit to find the lane boundary. """
+def find_lane_lines(img):
+    histogram = np.sum(img, axis=0)
+
+    # TODO: code these constants in one place
+    midpoint = int(1280 / 2)
+    left_max = np.argmax(histogram[:midpoint])
+    right_max = np.argmax(histogram[midpoint:]) + midpoint
+    print('max at {} and {}'.format(left_max, right_max))
+    import matplotlib.pyplot as plt
+    plt.plot(list(histogram))
+    plt.show()
+
 """ Determine the curvature of the lane and vehicle position with respect to center. """
 """ Warp the detected lane boundaries back onto the original image. """
 """ Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position. """
@@ -112,7 +124,9 @@ def pipeline(input_image):
 
     warped = perspective_warp_lane(threshold)
     cv2.imwrite('./output/traffic_perspective.jpg', warped)
-    imgprint(warped)
+    #imgprint(warped)
+
+    find_lane_lines(warped)
 
 if __name__ == '__main__':
     pipeline_init()
