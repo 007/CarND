@@ -10,6 +10,12 @@ from local_debug_helper import imgprint, imgprint_h
 CHESS_X = 9 # inner-horizontal corners on calibration images
 CHESS_Y = 6 # inner-vertical corners on calibration images
 
+""" Wrap image reading with error handling - cv2 just returns fine if image doesn't exist """
+def read_image(fname):
+    image = cv2.imread(fname)
+    assert image is not None, "image {} failed to load".format(fname)
+    return image
+
 def save_camera_calibration(mtx, dist):
     # save to camera_calibration.json
     json_data = {'mtx': mtx.tolist(), 'dist': dist.tolist()}
@@ -36,7 +42,7 @@ def compute_calibration(file_array):
     objp [:,:2] = np.mgrid[0:CHESS_X,0:CHESS_Y].T.reshape(-1,2)
     for fname in file_array:
         print("processing {}".format(fname))
-        img = cv2.imread(fname)
+        img = read_image(fname)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         ret, corners = cv2.findChessboardCorners(gray, (CHESS_X, CHESS_Y), None)
         if ret == True:
@@ -106,13 +112,13 @@ def find_lane_lines(img):
 def pipeline_init():
     # skip for now
     # compute_calibration(glob.glob('./camera_cal/calibration*.jpg'))
-    img = cv2.imread('./camera_cal/calibration2.jpg')
+    img = read_image('./camera_cal/calibration2.jpg')
     dst = correct_distortion(img)
     cv2.imwrite('./output/calibration_input.jpg', img)
     cv2.imwrite('./output/calibration_output.jpg', dst)
 
 def pipeline(input_image):
-    traffic_image = cv2.imread(input_image)
+    traffic_image = read_image(input_image)
 
     corrected = correct_distortion(traffic_image)
     cv2.imwrite('./output/traffic_calibrated.jpg', corrected)
