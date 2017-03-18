@@ -61,8 +61,8 @@ def correct_distortion(img):
 """ Use color transforms, gradients, etc., to create a thresholded binary image. """
 def image_to_threshold(img, thresh_min=100,thresh_max=255):
 
-    foo = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    bar = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
+    foo = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    bar = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
 
     # 1) Convert to grayscale
     # diff saturation channels
@@ -211,8 +211,8 @@ def build_lane_overlay(warped, left_fit, right_fit):
     pts = np.hstack((pts_left, pts_right))
 
     # Draw the lane onto the warped blank image
-    # color order is BGR
-    cv2.fillPoly(color_warp, np.int_([pts]), (255, 128, 64))
+    # color order is RGB
+    cv2.fillPoly(color_warp, np.int_([pts]), (64, 128, 255))
 
     # Warp the blank back to original image space
     newwarp = perspective_unwarp_lane(color_warp)
