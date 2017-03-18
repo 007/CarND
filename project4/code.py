@@ -61,8 +61,8 @@ def correct_distortion(img):
 """ Use color transforms, gradients, etc., to create a thresholded binary image. """
 def image_to_threshold(img, thresh_min=100,thresh_max=255):
 
-    foo = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
-    bar = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
+    foo = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    bar = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
 
     # 1) Convert to grayscale
     # diff saturation channels
@@ -236,6 +236,7 @@ def pipeline_init():
 
 def pipeline(input_image):
 
+#    cv2.imwrite('./output/traffic_input.jpg', input_image)
     corrected = correct_distortion(input_image)
 #    cv2.imwrite('./output/traffic_calibrated.jpg', corrected)
 
@@ -259,8 +260,8 @@ def video_pipeline(input_video):
 
 if __name__ == '__main__':
     pipeline_init()
-    input_image = read_image('test_images/straight_lines2.jpg')
-    output = pipeline(input_image)
-    cv2.imwrite('./output/final_overlay.jpg', output)
+#    input_image = read_image('test_images/test_fail.jpg')
+#    output = pipeline(input_image)
+#    cv2.imwrite('./output/final_overlay.jpg', output)
 
     video_pipeline('./project_video.mp4')
