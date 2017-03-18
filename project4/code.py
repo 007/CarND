@@ -130,7 +130,7 @@ def pipeline(input_image):
 
     warped = perspective_warp_lane(threshold)
     cv2.imwrite('./output/traffic_perspective.jpg', warped)
-    #imgprint(warped)
+    imgprint(warped, cmap="gray")
 
     find_lane_lines(warped)
 
