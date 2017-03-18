@@ -163,11 +163,16 @@ def find_lane_lines(img):
 
 
     """ Determine the curvature of the lane and vehicle position with respect to center. """
+    # calculate center
+    center = (IMG_W / 2) - ((np.polyval(left_fit, IMG_H) + np.polyval(right_fit, IMG_H)) / 2)
 
     yspace = np.linspace(0, IMG_H - 1, num=IMG_H)
     # Define conversions in x and y from pixels space to meters
     ym_per_pix = 30/IMG_H # meters per pixel in y dimension
     xm_per_pix = 3.7/700 # meters per pixel in x dimension
+
+    # convert center from pixels to meters
+    center_m = xm_per_pix * center
 
     # Fit new polynomials to x,y in world space
     left_fit_meters = np.polyfit(lefty * ym_per_pix, leftx * xm_per_pix, 2)
@@ -177,9 +182,8 @@ def find_lane_lines(img):
     right_curverad = ((1 + (2*right_fit_meters[0]*IMG_H*ym_per_pix + right_fit_meters[1])**2)**1.5) / np.absolute(2*right_fit_meters[0])
     # Now our radius of curvature is in meters - average two sides for return
     curve = (left_curverad + right_curverad) / 2
-    # TODO
-    center = 7
-    return left_fit, right_fit, curve, center
+
+    return left_fit, right_fit, curve, center_m
 
 
 """ Warp the detected lane boundaries back onto the original image. """
