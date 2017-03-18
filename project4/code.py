@@ -9,6 +9,8 @@ from local_debug_helper import imgprint, imgprint_h
 
 CHESS_X = 9 # inner-horizontal corners on calibration images
 CHESS_Y = 6 # inner-vertical corners on calibration images
+IMG_W = 1280 # hard-code input width
+IMG_H = 720 # hard-code input height
 
 """ Wrap image reading with error handling - cv2 just returns fine if image doesn't exist """
 def read_image(fname):
@@ -34,7 +36,7 @@ def load_camera_calibration():
 
 """ Compute the camera calibration matrix and distortion coefficients given a set of chessboard images. """
 def compute_calibration(file_array):
-    calibration_shape = (1280,720) # HARD CODED
+    calibration_shape = (IMG_W,IMG_H)
     obj_points = []
     img_points = []
 
@@ -82,7 +84,6 @@ def image_to_threshold(img, thresh_min=100,thresh_max=255):
 
 """ Apply a perspective transform to rectify binary image ("birds-eye view"). """
 def perspective_warp_lane(img):
-    IMG_W,IMG_H = 1280, 720
     border = 128
     from_shape = np.float32([ [595, 450], [690, 450], [1050, 675], [275, 675] ])
     to_shape = np.float32([ [border, border], [IMG_W-border, border], [IMG_W-border, IMG_H-border], [border, IMG_H-border] ])
