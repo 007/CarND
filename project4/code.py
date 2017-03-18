@@ -198,6 +198,30 @@ def find_lane_lines(img):
 
 
 """ Warp the detected lane boundaries back onto the original image. """
+def build_lane_overlay(warped, left_fit, right_fit):
+    # Create an image to draw the lines on
+    warp_zero = np.zeros_like(warped).astype(np.uint8)
+    color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
+
+    # Recast the x and y points into usable format for cv2.fillPoly()
+
+    yspace = np.linspace(0, IMG_H - 1, num=IMG_H)
+    left_points =  np.polyval(left_fit, yspace)
+    right_points = np.polyval(right_fit, yspace)
+    pts_left = np.array([np.transpose(np.vstack([left_points, yspace]))])
+    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_points, yspace])))])
+    pts = np.hstack((pts_left, pts_right))
+
+    # Draw the lane onto the warped blank image
+    # color order is BGR
+    cv2.fillPoly(color_warp, np.int_([pts]), (255, 64, 64))
+    imgprint(color_warp)
+
+    # Warp the blank back to original image space using inverse perspective matrix (Minv)
+    newwarp = perspective_unwarp_lane(color_warp)
+    imgprint(newwarp)
+    return newwarp
+
 """ Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position. """
 
 
@@ -225,6 +249,8 @@ def pipeline(input_image):
     #imgprint(warped, cmap="gray")
 
     left_fit, right_fit, curve, center = find_lane_lines(warped)
+
+    overlay = build_lane_overlay(warped, left_fit, right_fit)
 
 if __name__ == '__main__':
     pipeline_init()
