@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 # helper function for debugging - write image to plot and show immediately
-def imgprint(img):
+def imgprint(img, **kwargs):
     import matplotlib.pyplot as plt
-    plt.imshow(img)
+    plt.imshow(img, **kwargs)
     plt.show()
 
 def imgprint_h(img_arr):
