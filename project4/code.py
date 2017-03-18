@@ -231,19 +231,19 @@ def pipeline_init():
     # compute_calibration(glob.glob('./camera_cal/calibration*.jpg'))
     img = read_image('./camera_cal/calibration2.jpg')
     dst = correct_distortion(img)
-    cv2.imwrite('./output/calibration_input.jpg', img)
-    cv2.imwrite('./output/calibration_output.jpg', dst)
+#    cv2.imwrite('./output/calibration_input.jpg', img)
+#    cv2.imwrite('./output/calibration_output.jpg', dst)
 
 def pipeline(input_image):
 
     corrected = correct_distortion(input_image)
-    cv2.imwrite('./output/traffic_calibrated.jpg', corrected)
+#    cv2.imwrite('./output/traffic_calibrated.jpg', corrected)
 
     threshold = image_to_threshold(corrected)
-    cv2.imwrite('./output/traffic_thresholded.png', threshold * 255) # binary * 255 = black/white
+#    cv2.imwrite('./output/traffic_thresholded.png', threshold * 255) # binary * 255 = black/white
 
     warped = perspective_warp_lane(threshold)
-    cv2.imwrite('./output/traffic_perspective.png', warped * 255) # binary * 255 = black/white
+#    cv2.imwrite('./output/traffic_perspective.png', warped * 255) # binary * 255 = black/white
 
     left_fit, right_fit, curve, center = find_lane_lines(warped)
 
@@ -251,9 +251,16 @@ def pipeline(input_image):
     final = output_with_overlays(corrected, overlay, curve, center)
     return final
 
+def video_pipeline(input_video):
+    from moviepy.editor import VideoFileClip
+    in_vid = VideoFileClip(input_video)
+    out_vid = in_vid.fl_image(pipeline)
+    out_vid.write_videofile('./output/annoated_video.mp4', audio=False)
+
 if __name__ == '__main__':
     pipeline_init()
     input_image = read_image('test_images/straight_lines2.jpg')
     output = pipeline(input_image)
     cv2.imwrite('./output/final_overlay.jpg', output)
 
+    video_pipeline('./project_video.mp4')
