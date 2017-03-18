@@ -82,7 +82,7 @@ def image_to_threshold(img, thresh_min=100,thresh_max=255):
 
 def calculate_warp_params():
     border = 64
-    from_shape = np.float32([ [595, 450], [690, 450], [1050, 675], [275, 675] ])
+    from_shape = np.float32([ [595, 435], [690, 435], [1050, 675], [275, 675] ])
     to_shape = np.float32([ [border, border], [IMG_W-border, border], [IMG_W-border, IMG_H-border], [border, IMG_H-border] ])
     M = cv2.getPerspectiveTransform(from_shape, to_shape)
     return M
