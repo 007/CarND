@@ -82,11 +82,11 @@ def image_to_threshold(img, thresh_min=100,thresh_max=255):
 
 """ Apply a perspective transform to rectify binary image ("birds-eye view"). """
 def perspective_warp_lane(img):
-    w,h = 1280, 720
+    IMG_W,IMG_H = 1280, 720
     border = 128
     from_shape = np.float32([ [595, 450], [690, 450], [1050, 675], [275, 675] ])
-    to_shape = np.float32([ [border, border], [w-border, border], [w-border, h-border], [border, h-border] ])
-    img_size = (img.shape[1], img.shape[0])
+    to_shape = np.float32([ [border, border], [IMG_W-border, border], [IMG_W-border, IMG_H-border], [border, IMG_H-border] ])
+    img_size = (IMG_W, IMG_H)
     M = cv2.getPerspectiveTransform(from_shape, to_shape)
     warped = cv2.warpPerspective(img, M, img_size)
     return warped
