@@ -5,8 +5,6 @@ import glob
 import json
 import numpy as np
 
-from local_debug_helper import imgprint, imgprint_h
-
 CHESS_X = 9 # inner-horizontal corners on calibration images
 CHESS_Y = 6 # inner-vertical corners on calibration images
 IMG_W = 1280 # hard-code input width
@@ -214,12 +212,10 @@ def build_lane_overlay(warped, left_fit, right_fit):
 
     # Draw the lane onto the warped blank image
     # color order is BGR
-    cv2.fillPoly(color_warp, np.int_([pts]), (255, 64, 64))
-    #imgprint(color_warp)
+    cv2.fillPoly(color_warp, np.int_([pts]), (255, 128, 64))
 
     # Warp the blank back to original image space
     newwarp = perspective_unwarp_lane(color_warp)
-    #imgprint(newwarp)
     return newwarp
 
 """ Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position. """
@@ -243,15 +239,12 @@ def pipeline(input_image):
 
     corrected = correct_distortion(traffic_image)
     cv2.imwrite('./output/traffic_calibrated.jpg', corrected)
-    #imgprint(corrected)
 
     threshold = image_to_threshold(corrected)
-    cv2.imwrite('./output/traffic_tresholded.jpg', threshold)
-    #imgprint(threshold)
+    cv2.imwrite('./output/traffic_thresholded.png', threshold * 255) # binary * 255 = black/white
 
     warped = perspective_warp_lane(threshold)
-    cv2.imwrite('./output/traffic_perspective.jpg', warped)
-    #imgprint(warped, cmap="gray")
+    cv2.imwrite('./output/traffic_perspective.png', warped * 255) # binary * 255 = black/white
 
     left_fit, right_fit, curve, center = find_lane_lines(warped)
 
@@ -263,5 +256,4 @@ if __name__ == '__main__':
     pipeline_init()
     output = pipeline('test_images/straight_lines2.jpg')
     cv2.imwrite('./output/final_overlay.jpg', output)
-    imgprint(output)
 
