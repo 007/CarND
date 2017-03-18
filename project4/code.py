@@ -87,21 +87,20 @@ def calculate_warp_params():
     from_shape = np.float32([ [595, 450], [690, 450], [1050, 675], [275, 675] ])
     to_shape = np.float32([ [border, border], [IMG_W-border, border], [IMG_W-border, IMG_H-border], [border, IMG_H-border] ])
     M = cv2.getPerspectiveTransform(from_shape, to_shape)
-    Minv = cv2.getPerspectiveTransform(to_shape, from_shape)
-    return M, Minv
+    return M
 
 """ Apply a perspective transform to rectify binary image ("birds-eye view"). """
 def perspective_warp_lane(img):
-    M, _ = calculate_warp_params()
+    M = calculate_warp_params()
     img_size = (IMG_W, IMG_H)
     warped = cv2.warpPerspective(img, M, img_size)
     return warped
 
 """ invert perspective warp """
 def perspective_unwarp_lane(img):
-    _, Minv = calculate_warp_params()
+    M = calculate_warp_params()
     img_size = (IMG_W, IMG_H)
-    warped = cv2.warpPerspective(img, Minv, img_size)
+    warped = cv2.warpPerspective(img, M, img_size, flags=cv2.WARP_INVERSE_MAP)
     return warped
 
 """ Detect lane pixels and fit to find the lane boundary. """
