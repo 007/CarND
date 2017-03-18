@@ -235,9 +235,8 @@ def pipeline_init():
     cv2.imwrite('./output/calibration_output.jpg', dst)
 
 def pipeline(input_image):
-    traffic_image = read_image(input_image)
 
-    corrected = correct_distortion(traffic_image)
+    corrected = correct_distortion(input_image)
     cv2.imwrite('./output/traffic_calibrated.jpg', corrected)
 
     threshold = image_to_threshold(corrected)
@@ -254,6 +253,7 @@ def pipeline(input_image):
 
 if __name__ == '__main__':
     pipeline_init()
-    output = pipeline('test_images/straight_lines2.jpg')
+    input_image = read_image('test_images/straight_lines2.jpg')
+    output = pipeline(input_image)
     cv2.imwrite('./output/final_overlay.jpg', output)
 
