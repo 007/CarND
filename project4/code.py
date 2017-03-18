@@ -215,15 +215,20 @@ def build_lane_overlay(warped, left_fit, right_fit):
     # Draw the lane onto the warped blank image
     # color order is BGR
     cv2.fillPoly(color_warp, np.int_([pts]), (255, 64, 64))
-    imgprint(color_warp)
+    #imgprint(color_warp)
 
-    # Warp the blank back to original image space using inverse perspective matrix (Minv)
+    # Warp the blank back to original image space
     newwarp = perspective_unwarp_lane(color_warp)
-    imgprint(newwarp)
+    #imgprint(newwarp)
     return newwarp
 
 """ Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position. """
-
+def output_with_overlays(img, lane_overlay, curve, center):
+    # Combine the result with the original image
+    result = cv2.addWeighted(img, 1, lane_overlay, 0.3, 0)
+    # TODO: add text overlay for curvature
+    # TODO: add text overlay for center position
+    return result
 
 def pipeline_init():
     # skip for now
@@ -251,8 +256,12 @@ def pipeline(input_image):
     left_fit, right_fit, curve, center = find_lane_lines(warped)
 
     overlay = build_lane_overlay(warped, left_fit, right_fit)
+    final = output_with_overlays(corrected, overlay, curve, center)
+    return final
 
 if __name__ == '__main__':
     pipeline_init()
-    pipeline('test_images/straight_lines2.jpg')
+    output = pipeline('test_images/straight_lines2.jpg')
+    cv2.imwrite('./output/final_overlay.jpg', output)
+    imgprint(output)
 
