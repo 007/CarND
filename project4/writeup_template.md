@@ -40,15 +40,15 @@ The goals / steps of this project are the following:
 ###Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
 
 ---
-###Writeup / README
+### Writeup / README
 
-####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
+#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
 
 You're reading it!
 
-###Camera Calibration
+### Camera Calibration
 
-####1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
+#### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
 Distortion calibration and correction code can be found on [line 33 to 73 of code.py](code.py#L33-L73).
 
@@ -62,11 +62,11 @@ Sample input image:
 Calibrated output image:
 ![alt text][calout]
 
-###Pipeline (single images)
+### Pipeline (single images)
 
 The pipeline is defined simply in [`code.py` lines 253 to 269](code.py#L253-L269), with all of the hard work in the functions above.
 
-####1. Provide an example of a distortion-corrected image.
+#### 1. Provide an example of a distortion-corrected image.
 The images above are an example of distortion-corrected images, but I assume that this is meant to show a working example.
 
 The pipeline images will be based on this input image:
@@ -76,14 +76,14 @@ The first step is to correct for distortion using the calibration data calculate
 Distortion corrected:
 ![alt text][traffic-cal]
 
-####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+#### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 Thresholding is performed in the [`image_to_threshold` function](code.py#L75-L94).
 
 The image is converted to `HLS` colorspace, and the `S` channel is used exclusively. A Sobel operator is run over the image in `x` to find mostly-vertical lines. The gradient is normalized via `abs`, then scaled from a possible range of `0 - 1` to a range of `0 - 255` based on the actual maximum value in the image. The result is filtered for a minimum value of `12`. It is also filtered for a maximum value of `255`, but that corresponds to the maximum possible value.
 
 ![alt text][traffic-thresh]
 
-####3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
+#### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
 Perspective transform is calculated and performed in [`perspective_warp_lane` and `calculate_warp_params`](code.py#L97-L109).
 
@@ -97,18 +97,18 @@ Perspective area:
 Warped (thresholded) image:
 ![alt text][traffic-warp]
 
-####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
+#### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
 After thresholding and perspective transform, lane pixels are identified and turned into left and right lines in [`find_lane_lines`](code.py#L118-L185). The code is nearly a direct copy of the sample code from the course notes, only a parameter name or two have been changed. After finding histogram peaks for left and right groupings, a  windowing function which is used to find potential lane marker pixel clusters. It is iterated starting at the `current` location over a `margin` sized box, and points which are nonzero are counted for each window. Those points are appended to the lane indices, and if there are more than `minpix` within a window, their mean is calculated as the new `current` location for the next window.
 
 The left and right lane lines are calculated via 2nd-order polynomial on [lines 184 and 185](code.py#L184-L185).
 
-####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
+#### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
 [Radius of curvature](code.py#L188-L207) is calculated via the formulae provided in the course notes - as with the windowing code, it is used almost verbatim. [Lane position](code.py#L190-L198) uses the same parameters for converting pixel space to meter space. The lane center (average of left and right fit lines at the bottom of the image) is subtracted from the image center to calculate a pixel offset, which is multiplied by the conversion constant in the `x` dimension.
 
 
-####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
+#### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
 Plotting the lane image back on as an overlay is performed in [`build_lane_overlay`](code.py#L212-L233). It takes the left and right poly lines and fills the space between them with a color block. Since this is performed on a perspective-warped image, it also calls `perspective_unwarp_lane` to invert the perspective transform before returning the lane overlay.
 
@@ -117,17 +117,17 @@ The final step in the pipeline is to composite the original image, the lane over
 
 ---
 
-###Pipeline (video)
+### Pipeline (video)
 
-####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
+#### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
 Here's a [link to my video result](./annoated_video.mp4).
 
 ---
 
-###Discussion
+### Discussion
 
-####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
 The hardest part of the implementation was getting a thresholding scheme that would work consistently across different images. The sample data was very helpful, in that it provided most of the combinations that would cause trouble for different steps in the thresholding function. Having straight lines, curved lines, shady sections and other cars on the road all tripped up my implementation at one point or another, and having sample data to work with as a single image made experimenting much faster.
 
