@@ -26,6 +26,16 @@ The goals / steps of this project are the following:
 [image6]: ./examples/example_output.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
 
+[calin]: ./output/calibration_input.jpg "Raw input"
+[calout]: ./output/calibration_output.jpg "After calibration"
+[traffic-in]: ./output/traffic_input.jpg "Sample lane image"
+[traffic-cal]: ./output/traffic_calibrated.jpg "Calibrated lane image"
+[traffic-roi]: ./output/traffic_roi.jpg "Region of interest"
+[traffic-thresh]: ./output/traffic_thresholded.png "Lines found"
+[traffic-warp]: ./output/traffic_perspective.png "Warped projection"
+[traffic-final]: ./output/final_overlay.jpg "Final output"
+[video]: ./annoated_output.mp4 "Video"
+
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 ###Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
 
@@ -35,73 +45,75 @@ The goals / steps of this project are the following:
 ####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
 
 You're reading it!
+
 ###Camera Calibration
 
 ####1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
-The code for this step is contained in the first code cell of the IPython notebook located in "./examples/example.ipynb" (or in lines # through # of the file called `some_file.py`).  
+Distortion calibration and correction code can be found on [line 33 to 73 of code.py](code.py#L33-L73).
 
-I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
+Given a set of calibration images, "Chessboard corners" are used to calculate perspective and distortion coefficients for different sections of the frame. Each image is converted to grayscale, then `cv2.findChessboardCorners` is performed. The set of corners found is added to a list, and associated with a uniform grid - the found corners will be set to match the uniform grid after correction.
 
-I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
+After all calibration images have been searched, the full set of found corners and matching uniform corners are fed into `cv2.calibrateCamera` to calculate the calibration matrix and distortion parameters. Those parameters are saved as a JSON file.
 
-![alt text][image1]
+Sample input image:
+![alt text][calin]
+
+Calibrated output image:
+![alt text][calout]
 
 ###Pipeline (single images)
 
-####1. Provide an example of a distortion-corrected image.
-To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
-![alt text][image2]
-####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+The pipeline is defined simply in [`code.py` lines 253 to 269](code.py#L253-L269), with all of the hard work in the functions above.
 
-![alt text][image3]
+####1. Provide an example of a distortion-corrected image.
+The images above are an example of distortion-corrected images, but I assume that this is meant to show a working example.
+
+The pipeline images will be based on this input image:
+![alt text][traffic-in]
+
+The first step is to correct for distortion using the calibration data calculated as above. This happens on [line 256 via the `correct_distortion` function](code.py#L256).
+Distortion corrected:
+![alt text][traffic-cal]
+
+####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+Thresholding is performed in the [`image_to_threshold` function](code.py#L75-L94).
+
+The image is converted to `HLS` colorspace, and the `S` channel is used exclusively. A Sobel operator is run over the image in `x` to find mostly-vertical lines. The gradient is normalized via `abs`, then scaled from a possible range of `0 - 1` to a range of `0 - 255` based on the actual maximum value in the image. The result is filtered for a minimum value of `12`. It is also filtered for a maximum value of `255`, but that corresponds to the maximum possible value.
+
+![alt text][traffic-thresh]
 
 ####3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+Perspective transform is calculated and performed in [`perspective_warp_lane` and `calculate_warp_params`](code.py#L97-L109).
 
-```
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
+The region of interest for the perspective transform is defined in [`ROI_SHAPE`](code.py#L20-L25) as symmetric around the horizontal midpoint of the image, with a top and bottom horizontal line. Parameters are hard-coded, and were determined experimentally, with manual sanity checking for approximately correct perspective.
 
-```
-This resulted in the following source and destination points:
+The [destination mapping](code.py#L100) for the perspective transform is also hard-coded as an absolute offset (`border`) from the side of the image.
 
-| Source        | Destination   | 
-|:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
+Perspective area:
+![alt text][traffic-roi]
 
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
-
-![alt text][image4]
+Warped (thresholded) image:
+![alt text][traffic-warp]
 
 ####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+After thresholding and perspective transform, lane pixels are identified and turned into left and right lines in [`find_lane_lines`](code.py#L118-L185). The code is nearly a direct copy of the sample code from the course notes, only a parameter name or two have been changed. After finding histogram peaks for left and right groupings, a  windowing function which is used to find potential lane marker pixel clusters. It is iterated starting at the `current` location over a `margin` sized box, and points which are nonzero are counted for each window. Those points are appended to the lane indices, and if there are more than `minpix` within a window, their mean is calculated as the new `current` location for the next window.
 
-![alt text][image5]
+The left and right lane lines are calculated via 2nd-order polynomial on [lines 184 and 185](code.py#L184-L185).
 
 ####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+[Radius of curvature](code.py#L188-L207) is calculated via the formulae provided in the course notes - as with the windowing code, it is used almost verbatim. [Lane position](code.py#L190-L198) uses the same parameters for converting pixel space to meter space. The lane center (average of left and right fit lines at the bottom of the image) is subtracted from the image center to calculate a pixel offset, which is multiplied by the conversion constant in the `x` dimension.
+
 
 ####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+Plotting the lane image back on as an overlay is performed in [`build_lane_overlay`](code.py#L212-L233). It takes the left and right poly lines and fills the space between them with a color block. Since this is performed on a perspective-warped image, it also calls `perspective_unwarp_lane` to invert the perspective transform before returning the lane overlay.
 
-![alt text][image6]
+The final step in the pipeline is to composite the original image, the lane overlay, and annotations for curvature and lane position. All of these happen in [`output_with_overlays`](code.py#L235-L243), where the lane overlay is combined with a `0.3` weight on top of the original distortion-corrected image. Text is added via `cv2.putText` in the top-left corner, and the image is returned for the pipeline to continue.
+![alt text][traffic-final]
 
 ---
 
@@ -109,7 +121,7 @@ I implemented this step in lines # through # in my code in `yet_another_file.py`
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./annoated_video.mp4).
 
 ---
 
@@ -117,5 +129,12 @@ Here's a [link to my video result](./project_video.mp4)
 
 ####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+The hardest part of the implementation was getting a thresholding scheme that would work consistently across different images. The sample data was very helpful, in that it provided most of the combinations that would cause trouble for different steps in the thresholding function. Having straight lines, curved lines, shady sections and other cars on the road all tripped up my implementation at one point or another, and having sample data to work with as a single image made experimenting much faster.
 
+Color space still seems to be a problem. Even working strictly with `cv2` and `imread` / `imwrite` doesn't seem to solve the colorspace mixups, since `moviepy` and `matplot` both seem to work in `RGB` and `cv2` / `numpy` / `matplot` images don't carry a notion of field ordering or identity. Most of the time this manifested as weird sky colors, but in at least one instance I ended up with the overlay data being strange colors while the background image was fine.
+
+This pipeline will probably fail for any sharper curves than I accounted for. The ROI for the perspective transform is as small as it could be while completing the sample video, so it would likely lose track of some curves outside of its mask area. For the same reason, any samples where the vehicle is significantly off-center would probably fail.
+
+I stopped experimenting with thresholding algorithms when I got something that was good enough, that would probably be an excellent place to look for further improvements. I would also profile the entire pipeline, it was only getting 10-20FPS even on a multi-core multi-gigahertz system. For simple experiments that's not a problem, but for real-time driving control that could potentially be disasterous. From a quick analysis it seems like the camera distortion correction is the biggest bottleneck, so downsampling or other data reduction techniques may be the only way to improve that performance. Since such an action could drastically affect the quality of lane detection, it makes sense to profile all of the functions in the pipeline more thoroughly before changing something so integral to the process.
+
+The only thing that surprised me in completing this project was that I didn't need to implement the memory functions suggested in the course notes. I was able to get stable lane lines with no temporal averaging, and the lane detection windowing function was fast enough that I didn't have to optimize re-using the previous detection. 
