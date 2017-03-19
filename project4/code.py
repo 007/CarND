@@ -237,7 +237,9 @@ def output_with_overlays(img, lane_overlay, curve, center):
     # Combine the result with the original image
     result = cv2.addWeighted(img, 1, lane_overlay, 0.3, 0)
     # TODO: add text overlay for curvature
+    cv2.putText(result, 'Curvature: {:0.1f}m'.format(curve), (8, 32), cv2.FONT_HERSHEY_PLAIN, 2, (255,255,0), thickness=3)
     # TODO: add text overlay for center position
+    cv2.putText(result, 'Lane Offset: {:+0.3f}m'.format(center), (8, 64), cv2.FONT_HERSHEY_PLAIN, 2, (255,255,0), thickness=3)
     return result
 
 def pipeline_init():
