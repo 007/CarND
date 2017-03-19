@@ -272,7 +272,7 @@ def video_pipeline(input_video):
     from moviepy.editor import VideoFileClip
     in_vid = VideoFileClip(input_video)
     out_vid = in_vid.fl_image(pipeline)
-    out_vid.write_videofile('./output/annoated_video.mp4', audio=False)
+    out_vid.write_videofile('./output/annotated_video.mp4', audio=False)
 
 if __name__ == '__main__':
     pipeline_init()

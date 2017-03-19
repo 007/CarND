@@ -34,7 +34,6 @@ The goals / steps of this project are the following:
 [traffic-thresh]: ./output/traffic_thresholded.png "Lines found"
 [traffic-warp]: ./output/traffic_perspective.png "Warped projection"
 [traffic-final]: ./output/final_overlay.jpg "Final output"
-[video]: ./annoated_output.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 ###Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
@@ -121,7 +120,7 @@ The final step in the pipeline is to composite the original image, the lane over
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](./annoated_video.mp4).
+Here's a [link to my video result](./annotated_video.mp4).
 
 ---
 
