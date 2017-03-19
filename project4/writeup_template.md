@@ -49,7 +49,7 @@ You're reading it!
 
 #### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
-Distortion calibration and correction code can be found on [line 33 to 73 of code.py](code.py#L33-L73).
+Distortion calibration and correction code can be found on [line 34 to 74 of code.py](code.py#L34-L74).
 
 Given a set of calibration images, "Chessboard corners" are used to calculate perspective and distortion coefficients for different sections of the frame. Each image is converted to grayscale, then `cv2.findChessboardCorners` is performed. The set of corners found is added to a list, and associated with a uniform grid - the found corners will be set to match the uniform grid after correction.
 
@@ -63,7 +63,7 @@ Calibrated output image:
 
 ### Pipeline (single images)
 
-The pipeline is defined simply in [`code.py` lines 253 to 269](code.py#L253-L269), with all of the hard work in the functions above.
+The pipeline is defined simply in [`code.py` lines 268 to 284](code.py#L268-L284), with all of the hard work in the functions above.
 
 #### 1. Provide an example of a distortion-corrected image.
 The images above are an example of distortion-corrected images, but I assume that this is meant to show a working example.
@@ -71,12 +71,12 @@ The images above are an example of distortion-corrected images, but I assume tha
 The pipeline images will be based on this input image:
 ![alt text][traffic-in]
 
-The first step is to correct for distortion using the calibration data calculated as above. This happens on [line 256 via the `correct_distortion` function](code.py#L256).
+The first step is to correct for distortion using the calibration data calculated as above. This happens on [line 271 via the `correct_distortion` function](code.py#L271).
 Distortion corrected:
 ![alt text][traffic-cal]
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
-Thresholding is performed in the [`image_to_threshold` function](code.py#L75-L94).
+Thresholding is performed in the [`image_to_threshold` function](code.py#L77-L95).
 
 The image is converted to `HLS` colorspace, and the `S` channel is used exclusively. A Sobel operator is run over the image in `x` to find mostly-vertical lines. The gradient is normalized via `abs`, then scaled from a possible range of `0 - 1` to a range of `0 - 255` based on the actual maximum value in the image. The result is filtered for a minimum value of `12`. It is also filtered for a maximum value of `255`, but that corresponds to the maximum possible value.
 
@@ -84,11 +84,11 @@ The image is converted to `HLS` colorspace, and the `S` channel is used exclusiv
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-Perspective transform is calculated and performed in [`perspective_warp_lane` and `calculate_warp_params`](code.py#L97-L109).
+Perspective transform is calculated and performed in [`perspective_warp_lane` and `calculate_warp_params`](code.py#L98-L110).
 
-The region of interest for the perspective transform is defined in [`ROI_SHAPE`](code.py#L20-L25) as symmetric around the horizontal midpoint of the image, with a top and bottom horizontal line. Parameters are hard-coded, and were determined experimentally, with manual sanity checking for approximately correct perspective.
+The region of interest for the perspective transform is defined in [`ROI_SHAPE`](code.py#L21-L26) as symmetric around the horizontal midpoint of the image, with a top and bottom horizontal line. Parameters are hard-coded, and were determined experimentally, with manual sanity checking for approximately correct perspective.
 
-The [destination mapping](code.py#L100) for the perspective transform is also hard-coded as an absolute offset (`border`) from the side of the image.
+The [destination mapping](code.py#L101) for the perspective transform is also hard-coded as an absolute offset (`border`) from the side of the image.
 
 Perspective area:
 ![alt text][traffic-roi]
@@ -98,20 +98,22 @@ Warped (thresholded) image:
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-After thresholding and perspective transform, lane pixels are identified and turned into left and right lines in [`find_lane_lines`](code.py#L118-L185). The code is nearly a direct copy of the sample code from the course notes, only a parameter name or two have been changed. After finding histogram peaks for left and right groupings, a  windowing function which is used to find potential lane marker pixel clusters. It is iterated starting at the `current` location over a `margin` sized box, and points which are nonzero are counted for each window. Those points are appended to the lane indices, and if there are more than `minpix` within a window, their mean is calculated as the new `current` location for the next window.
+After thresholding and perspective transform, lane pixels are identified and turned into left and right lines in [`find_lane_lines`](code.py#L121-L200). The code is nearly a direct copy of the sample code from the course notes, only a parameter name or two have been changed. After finding histogram peaks for left and right groupings, a  windowing function which is used to find potential lane marker pixel clusters. It is iterated starting at the `current` location over a `margin` sized box, and points which are nonzero are counted for each window. Those points are appended to the lane indices, and if there are more than `minpix` within a window, their mean is calculated as the new `current` location for the next window.
 
-The left and right lane lines are calculated via 2nd-order polynomial on [lines 184 and 185](code.py#L184-L185).
+For subsequent images, the previous offsets are used as a starting point, and a search is made within `margin` around the previous locations. This helps to prevent drastic lane size changes, as the lane location can only drift a small amount between frames. When relying on a full (new) window search each frame, I had trouble with detecting the right lane line in some locations - this adjustment to re-use previous information made that significantly smoother and eliminated all major changes in lane width.
+
+The left and right lane lines are calculated via 2nd-order polynomial on [lines 199 and 200](code.py#L199-L200).
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-[Radius of curvature](code.py#L188-L207) is calculated via the formulae provided in the course notes - as with the windowing code, it is used almost verbatim. [Lane position](code.py#L190-L198) uses the same parameters for converting pixel space to meter space. The lane center (average of left and right fit lines at the bottom of the image) is subtracted from the image center to calculate a pixel offset, which is multiplied by the conversion constant in the `x` dimension.
+[Radius of curvature](code.py#L203-L222) is calculated via the formulae provided in the course notes - as with the windowing code, it is used almost verbatim. [Lane position](code.py#L205-L213) uses the same parameters for converting pixel space to meter space. The lane center (average of left and right fit lines at the bottom of the image) is subtracted from the image center to calculate a pixel offset, which is multiplied by the conversion constant in the `x` dimension.
 
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-Plotting the lane image back on as an overlay is performed in [`build_lane_overlay`](code.py#L212-L233). It takes the left and right poly lines and fills the space between them with a color block. Since this is performed on a perspective-warped image, it also calls `perspective_unwarp_lane` to invert the perspective transform before returning the lane overlay.
+Plotting the lane image back on as an overlay is performed in [`build_lane_overlay`](code.py#L227-L248). It takes the left and right poly lines and fills the space between them with a color block. Since this is performed on a perspective-warped image, it also calls `perspective_unwarp_lane` to invert the perspective transform before returning the lane overlay.
 
-The final step in the pipeline is to composite the original image, the lane overlay, and annotations for curvature and lane position. All of these happen in [`output_with_overlays`](code.py#L235-L243), where the lane overlay is combined with a `0.3` weight on top of the original distortion-corrected image. Text is added via `cv2.putText` in the top-left corner, and the image is returned for the pipeline to continue.
+The final step in the pipeline is to composite the original image, the lane overlay, and annotations for curvature and lane position. All of these happen in [`output_with_overlays`](code.py#L250-L258), where the lane overlay is combined with a `0.3` weight on top of the original distortion-corrected image. Text is added via `cv2.putText` in the top-left corner, and the image is returned for the pipeline to continue.
 ![alt text][traffic-final]
 
 ---
@@ -136,4 +138,4 @@ This pipeline will probably fail for any sharper curves than I accounted for. Th
 
 I stopped experimenting with thresholding algorithms when I got something that was good enough, that would probably be an excellent place to look for further improvements. I would also profile the entire pipeline, it was only getting 10-20FPS even on a multi-core multi-gigahertz system. For simple experiments that's not a problem, but for real-time driving control that could potentially be disasterous. From a quick analysis it seems like the camera distortion correction is the biggest bottleneck, so downsampling or other data reduction techniques may be the only way to improve that performance. Since such an action could drastically affect the quality of lane detection, it makes sense to profile all of the functions in the pipeline more thoroughly before changing something so integral to the process.
 
-The only thing that surprised me in completing this project was that I didn't need to implement the memory functions suggested in the course notes. I was able to get stable lane lines with no temporal averaging, and the lane detection windowing function was fast enough that I didn't have to optimize re-using the previous detection. 
+~~The only thing that surprised me in completing this project was that I didn't need to implement the memory functions suggested in the course notes. I was able to get stable lane lines with no temporal averaging, and the lane detection windowing function was fast enough that I didn't have to optimize re-using the previous detection.~~ To meet the review criteria, I ended up having to implement the sliding window optimization. I am still surprised at how stable the performance is outside of that, in that I had to make only very small changes to my structure and parameters to go from straight lanes to sharp left or right curves.

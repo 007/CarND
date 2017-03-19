@@ -76,7 +76,7 @@ def correct_distortion(img):
 """ Use color transforms, gradients, etc., to create a thresholded binary image. """
 def image_to_threshold(img, thresh_min=12,thresh_max=255):
 
-    foo = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    foo = cv2.cvtColor(img, cv2.COLOR_BGR2HSV) # TODO: delete, not used!
     bar = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
 
     # 1) Convert to grayscale
