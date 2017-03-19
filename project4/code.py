@@ -247,8 +247,8 @@ def pipeline_init():
     # compute_calibration(glob.glob('./camera_cal/calibration*.jpg'))
     img = read_image('./camera_cal/calibration2.jpg')
     dst = correct_distortion(img)
-#    cv2.imwrite('./output/calibration_input.jpg', img)
-#    cv2.imwrite('./output/calibration_output.jpg', dst)
+    cv2.imwrite('./output/calibration_input.jpg', img)
+    cv2.imwrite('./output/calibration_output.jpg', dst)
 
 def pipeline(input_image):
 
