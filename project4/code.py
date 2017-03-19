@@ -5,6 +5,7 @@ import glob
 import json
 import numpy as np
 
+from local_debug_helper import play_vid
 CHESS_X = 9 # inner-horizontal corners on calibration images
 CHESS_Y = 6 # inner-vertical corners on calibration images
 IMG_W = 1280 # hard-code input width
@@ -270,9 +271,10 @@ def pipeline(input_image):
 
 def video_pipeline(input_video):
     from moviepy.editor import VideoFileClip
-    in_vid = VideoFileClip(input_video)
+    in_vid = VideoFileClip(input_video).subclip(45)
     out_vid = in_vid.fl_image(pipeline)
     out_vid.write_videofile('./output/annotated_video.mp4', audio=False)
+    play_vid('output/annotated_video.mp4')
 
 if __name__ == '__main__':
     pipeline_init()

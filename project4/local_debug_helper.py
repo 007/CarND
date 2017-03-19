@@ -22,3 +22,7 @@ def channel_images(txt, img):
     for i in range(3):
         cv2.imwrite('channel.png', img[:,:,i])
         call(['display', 'channel.png'])
+
+def play_vid(name):
+    from subprocess import call
+    call(['vlc', '--play-and-exit', name])
