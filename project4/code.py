@@ -10,6 +10,20 @@ CHESS_Y = 6 # inner-vertical corners on calibration images
 IMG_W = 1280 # hard-code input width
 IMG_H = 720 # hard-code input height
 
+ROI_TOP_OFS = 80
+ROI_BOT_OFS = 540
+
+ROI_SPLIT_BASE = int(IMG_W / 2)
+ROI_TOP = 450
+ROI_BOT = 675
+
+ROI_SHAPE = np.float32([
+                        [ROI_SPLIT_BASE - ROI_TOP_OFS, ROI_TOP],
+                        [ROI_SPLIT_BASE + ROI_TOP_OFS, ROI_TOP],
+                        [ROI_SPLIT_BASE + ROI_BOT_OFS, ROI_BOT],
+                        [ROI_SPLIT_BASE - ROI_BOT_OFS, ROI_BOT]
+                    ])
+
 """ Wrap image reading with error handling - cv2 just returns fine if image doesn't exist """
 def read_image(fname):
     image = cv2.imread(fname)
@@ -59,14 +73,14 @@ def correct_distortion(img):
     return cv2.undistort(img, mtx, dist, None, mtx)
 
 """ Use color transforms, gradients, etc., to create a thresholded binary image. """
-def image_to_threshold(img, thresh_min=100,thresh_max=255):
+def image_to_threshold(img, thresh_min=12,thresh_max=255):
 
     foo = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     bar = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
 
     # 1) Convert to grayscale
     # diff saturation channels
-    gray = foo[:,:,1] - bar[:,:,2]
+    gray = bar[:,:,2]
     # 2) Take the derivative in x
     sobel = cv2.Sobel(gray, cv2.CV_64F, 1, 0)
     # 3) Take the absolute value of the derivative or gradient
@@ -82,7 +96,7 @@ def image_to_threshold(img, thresh_min=100,thresh_max=255):
 
 def calculate_warp_params():
     border = 64
-    from_shape = np.float32([ [595, 435], [690, 435], [1050, 675], [275, 675] ])
+    from_shape = ROI_SHAPE
     to_shape = np.float32([ [border, border], [IMG_W-border, border], [IMG_W-border, IMG_H-border], [border, IMG_H-border] ])
     M = cv2.getPerspectiveTransform(from_shape, to_shape)
     return M
