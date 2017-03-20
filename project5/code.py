@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import gc
+
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
@@ -73,6 +75,7 @@ def extract_hog_features(imgs, cspace='RGB', hog_channel=0):
             hog_features = get_hog_features(feature_image[:,:,hog_channel])
         # Append the new feature vector to the features list
         features.append(hog_features)
+    gc.collect()
     # Return list of feature vectors
     return features
 
@@ -148,6 +151,9 @@ if __name__ == '__main__':
 
     # Define the labels vector
     y = np.hstack((np.ones(len(car_features)), np.zeros(len(notcar_features))))
+    del car_features
+    del notcar_features
+    gc.collect()
 
 
     # Split up data into randomized training and test sets
