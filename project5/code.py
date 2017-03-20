@@ -6,10 +6,10 @@ import numpy as np
 import cv2
 import glob
 import time
+from skimage.feature import hog
 from sklearn.svm import LinearSVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-
 
 def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
     # Make a copy of the image
@@ -24,20 +24,37 @@ def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
 
 # tweaked params from suggested 9/8/2 to 18/6/3 based on http://slideplayer.com/slide/5111258/ slide 19
 def get_hog_features(img, orient=18, pix_per_cell=6, cell_per_block=3):
-    from skimage.feature import hog
     features = hog( img,
                     orientations=orient,
                     pixels_per_cell=(pix_per_cell, pix_per_cell),
                     cells_per_block=(cell_per_block, cell_per_block),
-                    transform_sqrt=True, 
+                    transform_sqrt=True,
                     visualise=False,
                     feature_vector=True
                     )
     return features
 
+# Define a function to compute binned color features
+def bin_spatial(img, size=(32, 32)):
+    # Use cv2.resize().ravel() to create the feature vector
+    features = cv2.resize(img, size).ravel()
+    # Return the feature vector
+    return features
+
+# Define a function to compute color histogram features
+def color_hist(img, nbins=32, bins_range=(0, 256)):
+    # Compute the histogram of the color channels separately
+    channel1_hist = np.histogram(img[:,:,0], bins=nbins, range=bins_range)
+    channel2_hist = np.histogram(img[:,:,1], bins=nbins, range=bins_range)
+    channel3_hist = np.histogram(img[:,:,2], bins=nbins, range=bins_range)
+    # Concatenate the histograms into a single feature vector
+    hist_features = np.concatenate((channel1_hist[0], channel2_hist[0], channel3_hist[0]))
+    # Return the individual histograms, bin_centers and feature vector
+    return hist_features
+
 # Define a function to extract features from a list of images
 # Have this function call bin_spatial() and color_hist()
-def extract_features(imgs, cspace='RGB', spatial_size=(32, 32),
+def extract_color_features(imgs, cspace='RGB', spatial_size=(32, 32),
                         hist_bins=32, hist_range=(0, 256)):
     # Create a list to append feature vectors to
     features = []
@@ -55,7 +72,7 @@ def extract_features(imgs, cspace='RGB', spatial_size=(32, 32),
                 feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
             elif cspace == 'YUV':
                 feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
-        else: feature_image = np.copy(image)      
+        else: feature_image = np.copy(image)
         # Apply bin_spatial() to get spatial color features
         spatial_features = bin_spatial(feature_image, size=spatial_size)
         # Apply color_hist() also with a color space option now
@@ -64,30 +81,6 @@ def extract_features(imgs, cspace='RGB', spatial_size=(32, 32),
         features.append(np.concatenate((spatial_features, hist_features)))
     # Return list of feature vectors
     return features
-
-
-
-
-
-
-
-# Define a function to compute binned color features  
-def bin_spatial(img, size=(32, 32)):
-    # Use cv2.resize().ravel() to create the feature vector
-    features = cv2.resize(img, size).ravel() 
-    # Return the feature vector
-    return features
-
-# Define a function to compute color histogram features  
-def color_hist(img, nbins=32, bins_range=(0, 256)):
-    # Compute the histogram of the color channels separately
-    channel1_hist = np.histogram(img[:,:,0], bins=nbins, range=bins_range)
-    channel2_hist = np.histogram(img[:,:,1], bins=nbins, range=bins_range)
-    channel3_hist = np.histogram(img[:,:,2], bins=nbins, range=bins_range)
-    # Concatenate the histograms into a single feature vector
-    hist_features = np.concatenate((channel1_hist[0], channel2_hist[0], channel3_hist[0]))
-    # Return the individual histograms, bin_centers and feature vector
-    return hist_features
 
 
 if __name__ == '__main__':
@@ -105,7 +98,7 @@ if __name__ == '__main__':
                             hist_bins=histbin, hist_range=(0, 256))
 
     # Create an array stack of feature vectors
-    X = np.vstack((car_features, notcar_features)).astype(np.float64)                        
+    X = np.vstack((car_features, notcar_features)).astype(np.float64)
     # Fit a per-column scaler
     X_scaler = StandardScaler().fit(X)
     # Apply the scaler to X
@@ -123,7 +116,7 @@ if __name__ == '__main__':
     print('Using spatial binning of:',spatial,
         'and', histbin,'histogram bins')
     print('Feature vector length:', len(X_train[0]))
-    # Use a linear SVC 
+    # Use a linear SVC
     svc = LinearSVC()
     # Check the training time for the SVC
     t=time.time()
