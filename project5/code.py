@@ -21,6 +21,23 @@ def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
     # Return the image copy with boxes drawn
     return draw_img
 
+def colorspace_convert(img, cspace):
+    # apply color conversion if other than 'RGB'
+    if cspace != 'RGB':
+        if cspace == 'HSV':
+            return_image = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+        elif cspace == 'LUV':
+            return_image = cv2.cvtColor(img, cv2.COLOR_RGB2LUV)
+        elif cspace == 'HLS':
+            return_image = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
+        elif cspace == 'YUV':
+            return_image = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
+        elif cspace == 'YCrCb':
+            return_image = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
+    else:
+        return_image = np.copy(img)
+
+    return return_image
 
 # tweaked params from suggested 9/8/2 to 18/6/3 based on http://slideplayer.com/slide/5111258/ slide 19
 def get_hog_features(img, orient=18, pix_per_cell=6, cell_per_block=3):
@@ -45,18 +62,7 @@ def extract_hog_features(imgs, cspace='RGB', orient=9,
         # Read in each one by one
         image = mpimg.imread(file)
         # apply color conversion if other than 'RGB'
-        if cspace != 'RGB':
-            if cspace == 'HSV':
-                feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-            elif cspace == 'LUV':
-                feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2LUV)
-            elif cspace == 'HLS':
-                feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
-            elif cspace == 'YUV':
-                feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
-            elif cspace == 'YCrCb':
-                feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2YCrCb)
-        else: feature_image = np.copy(image)
+        feature_image = colorspace_convert(image, cspace)
 
         if hog_channel == 'ALL':
             hog_features = []
@@ -101,16 +107,7 @@ def extract_color_features(imgs, cspace='RGB', spatial_size=(32, 32),
         # Read in each one by one
         image = mpimg.imread(file)
         # apply color conversion if other than 'RGB'
-        if cspace != 'RGB':
-            if cspace == 'HSV':
-                feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-            elif cspace == 'LUV':
-                feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2LUV)
-            elif cspace == 'HLS':
-                feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
-            elif cspace == 'YUV':
-                feature_image = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
-        else: feature_image = np.copy(image)
+        feature_image = colorspace_convert(image, cspace)
         # Apply bin_spatial() to get spatial color features
         spatial_features = bin_spatial(feature_image, size=spatial_size)
         # Apply color_hist() also with a color space option now
