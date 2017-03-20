@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 import glob
+import pickle
 import time
 from skimage.feature import hog
 from sklearn.svm import LinearSVC
@@ -53,8 +54,7 @@ def get_hog_features(img, orient=18, pix_per_cell=6, cell_per_block=3):
 
 # Define a function to extract features from a list of images
 # Have this function call bin_spatial() and color_hist()
-def extract_hog_features(imgs, cspace='RGB', orient=9,
-                        pix_per_cell=8, cell_per_block=2, hog_channel=0):
+def extract_hog_features(imgs, cspace='RGB', hog_channel=0):
     # Create a list to append feature vectors to
     features = []
     # Iterate through the list of images
@@ -67,7 +67,7 @@ def extract_hog_features(imgs, cspace='RGB', orient=9,
         if hog_channel == 'ALL':
             hog_features = []
             for channel in range(feature_image.shape[2]):
-                hog_features.append(get_hog_features(feature_image[:,:,channel])
+                hog_features.append(get_hog_features(feature_image[:,:,channel]))
             hog_features = np.ravel(hog_features)
         else:
             hog_features = get_hog_features(feature_image[:,:,hog_channel])
@@ -127,11 +127,18 @@ if __name__ == '__main__':
     spatial = 32
     histbin = 32
 
-    car_features = extract_features(cars, cspace='RGB', spatial_size=(spatial, spatial),
-                            hist_bins=histbin, hist_range=(0, 256))
-    notcar_features = extract_features(not_cars, cspace='RGB', spatial_size=(spatial, spatial),
-                            hist_bins=histbin, hist_range=(0, 256))
+    ### TODO: Tweak these parameters and see how the results change.
+    colorspace = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+    orient = 18
+    pix_per_cell = 6
+    cell_per_block = 3
+    hog_channel = 'ALL' # Can be 0, 1, 2, or "ALL"
 
+    time_start = time.time()
+    car_features = extract_hog_features(cars, cspace=colorspace, hog_channel=hog_channel)
+    notcar_features = extract_hog_features(not_cars, cspace=colorspace, hog_channel=hog_channel)
+    time_end = time.time()
+    print(round(time_end - time_start, 2), 'Seconds to extract HOG features...')
     # Create an array stack of feature vectors
     X = np.vstack((car_features, notcar_features)).astype(np.float64)
     # Fit a per-column scaler
@@ -148,8 +155,8 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(
         scaled_X, y, test_size=0.2, random_state=rand_state)
 
-    print('Using spatial binning of:',spatial,
-        'and', histbin,'histogram bins')
+    print('Using:',orient,'orientations',pix_per_cell,
+        'pixels per cell and', cell_per_block,'cells per block')
     print('Feature vector length:', len(X_train[0]))
     # Use a linear SVC
     svc = LinearSVC()
@@ -160,6 +167,15 @@ if __name__ == '__main__':
     print(round(time_end - time_start, 2), 'Seconds to train SVC...')
     # Check the score of the SVC
     print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
+
+    # Save this, because we can
+    with open('svm.p', 'wb') as f:
+        pickle.dump(svc, f)
+
+    with open('svm.p', 'rb') as f:
+        svc = pickle.load(f)
+
+
     # Check the prediction time for a single sample
     time_start = time.time()
     n_predict = 10
