@@ -43,6 +43,20 @@ def get_hog_features(img, orient=18, pix_per_cell=6, cell_per_block=3):
                     )
     return features
 
+def process_image_hog(img, cspace='RGB', hog_channel=0):
+    # apply color conversion if other than 'RGB'
+    feature_image = colorspace_convert(img, cspace)
+
+    if hog_channel == 'ALL':
+        hog_features = []
+        for channel in range(feature_image.shape[2]):
+            hog_features.append(get_hog_features(feature_image[:,:,channel]))
+        hog_features = np.ravel(hog_features)
+    else:
+        hog_features = get_hog_features(feature_image[:,:,hog_channel])
+    # Append the new feature vector to the features list
+    return hog_features
+
 # Define a function to extract features from a list of images
 def extract_hog_features(imgs, cspace='RGB', hog_channel=0):
     # Create a list to append feature vectors to
@@ -51,18 +65,7 @@ def extract_hog_features(imgs, cspace='RGB', hog_channel=0):
     for file in imgs:
         # Read in each one by one
         image = mpimg.imread(file)
-        # apply color conversion if other than 'RGB'
-        feature_image = colorspace_convert(image, cspace)
-
-        if hog_channel == 'ALL':
-            hog_features = []
-            for channel in range(feature_image.shape[2]):
-                hog_features.append(get_hog_features(feature_image[:,:,channel]))
-            hog_features = np.ravel(hog_features)
-        else:
-            hog_features = get_hog_features(feature_image[:,:,hog_channel])
-        # Append the new feature vector to the features list
-        features.append(hog_features)
+        features.append(process_image_hog(image, cspace, hog_channel))
     gc.collect()
     # Return list of feature vectors
     return features
