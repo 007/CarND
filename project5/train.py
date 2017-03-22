@@ -13,6 +13,12 @@ from sklearn.svm import LinearSVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
+# tweaked params from suggested 9/8/2 to 18/6/3 based on http://slideplayer.com/slide/5111258/ slide 19
+HOG_ORIENTATIONS = 18
+HOG_CELL_SIZE = 6
+HOG_CELLS_PER_BLOCK = 3
+
+
 def colorspace_convert(img, cspace):
     # apply color conversion if other than 'RGB'
     if cspace != 'RGB':
@@ -31,8 +37,7 @@ def colorspace_convert(img, cspace):
 
     return return_image
 
-# tweaked params from suggested 9/8/2 to 18/6/3 based on http://slideplayer.com/slide/5111258/ slide 19
-def get_hog_features(img, orient=18, pix_per_cell=6, cell_per_block=3):
+def get_hog_features(img, orient=HOG_ORIENTATIONS, pix_per_cell=HOG_CELL_SIZE, cell_per_block=HOG_CELLS_PER_BLOCK):
     features = hog( img,
                     orientations=orient,
                     pixels_per_cell=(pix_per_cell, pix_per_cell),
@@ -81,9 +86,6 @@ if __name__ == '__main__':
 
     ### TODO: Tweak these parameters and see how the results change.
     colorspace = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
-    orient = 18
-    pix_per_cell = 6
-    cell_per_block = 3
     hog_channel = 'ALL' # Can be 0, 1, 2, or "ALL"
 
     time_start = time.time()
@@ -110,8 +112,7 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(
         scaled_X, y, test_size=0.2, random_state=rand_state)
 
-    print('Using:',orient,'orientations',pix_per_cell,
-        'pixels per cell and', cell_per_block,'cells per block')
+    print('Using:', HOG_ORIENTATIONS, 'orientations', HOG_CELL_SIZE, 'pixels (NxN) per cell and', HOG_CELLS_PER_BLOCK, 'cells per block')
     print('Feature vector length:', len(X_train[0]))
     # Use a linear SVC
     svc = LinearSVC()
