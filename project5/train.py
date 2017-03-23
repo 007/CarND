@@ -21,19 +21,25 @@ HOG_CELLS_PER_BLOCK = 3
 
 def colorspace_convert(img, cspace):
     # apply color conversion if other than 'RGB'
-    if cspace != 'RGB':
-        if cspace == 'HSV':
-            return_image = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
-        elif cspace == 'LUV':
-            return_image = cv2.cvtColor(img, cv2.COLOR_RGB2LUV)
-        elif cspace == 'HLS':
-            return_image = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
-        elif cspace == 'YUV':
-            return_image = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
-        elif cspace == 'YCrCb':
-            return_image = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
-    else:
+    if cspace == 'RGB':
         return_image = np.copy(img)
+    elif cspace == 'HLS':
+        return_image = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
+    elif cspace == 'HSV':
+        return_image = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    elif cspace == 'LAB':
+        return_image = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
+    elif cspace == 'LUV':
+        return_image = cv2.cvtColor(img, cv2.COLOR_RGB2LUV)
+    elif cspace == 'XYZ':
+        return_image = cv2.cvtColor(img, cv2.COLOR_RGB2XYZ)
+    elif cspace == 'YCrCb':
+        return_image = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
+    elif cspace == 'YUV':
+        return_image = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
+    else:
+        print('Unknown colorspace "{}"'.format(cspace))
+        assert(False)
 
     return return_image
 
@@ -85,7 +91,7 @@ if __name__ == '__main__':
     histbin = 32
 
     ### TODO: Tweak these parameters and see how the results change.
-    colorspace = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+    colorspace = 'YCrCb' # Can be RGB, HLS, HSV, LAB, LUV, XYZ, YCrCb, YUV
     hog_channel = 'ALL' # Can be 0, 1, 2, or "ALL"
 
     time_start = time.time()
