@@ -138,4 +138,6 @@ if __name__ == '__main__':
     print('    My SVC predicts: ', svc.predict(X_test[0:n_predict]))
     print('For these',n_predict, 'labels: ', y_test[0:n_predict])
     time_end = time.time()
-    print(round(time_end - time_start, 5), 'Seconds to predict', n_predict,'labels with SVC')
+    time_delta = time_end - time_start
+    features_per_second = n_predict / time_delta
+    print(round(time_delta, 5), 'Seconds to predict', n_predict,'labels with SVC', round(features_per_second, 5), 'HOG features per second')
