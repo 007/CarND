@@ -114,6 +114,11 @@ if __name__ == '__main__':
         X = np.vstack((car_features, notcar_features)).astype(np.float64)
         # Fit a per-column scaler
         X_scaler = StandardScaler().fit(X)
+
+        # Save scaler for direct integration into hog/svc
+        with open('scaler-{}.p'.format(colorspace), 'wb') as f:
+            pickle.dump(X_scaler, f)
+
         # Apply the scaler to X
         scaled_X = X_scaler.transform(X)
 
