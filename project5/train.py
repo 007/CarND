@@ -20,6 +20,9 @@ HOG_CELLS_PER_BLOCK = 3
 
 
 def colorspace_convert(img, cspace):
+    # account for stupid mpimg.imread that scales things differently
+    #if np.ptp(img) <= 1.: img = (img * 255.).astype(np.uint8)
+    img = (img * 255.).astype(np.uint8)
     # apply color conversion if other than 'RGB'
     if cspace == 'RGB':
         return_image = np.copy(img)
@@ -69,7 +72,7 @@ def process_image_hog(img, cspace='RGB', hog_channel=0):
     return hog_features
 
 # Define a function to extract features from a list of images
-def extract_hog_features(imgs, cspace='RGB', hog_channel=0):
+def extract_hog_features(imgs, cspace='RGB', hog_channel='ALL'):
     # Create a list to append feature vectors to
     features = []
     # Iterate through the list of images
@@ -94,56 +97,61 @@ if __name__ == '__main__':
     colorspace = 'YCrCb' # Can be RGB, HLS, HSV, LAB, LUV, XYZ, YCrCb, YUV
     hog_channel = 'ALL' # Can be 0, 1, 2, or "ALL"
 
-    time_start = time.time()
-    car_features = extract_hog_features(cars, cspace=colorspace, hog_channel=hog_channel)
-    notcar_features = extract_hog_features(not_cars, cspace=colorspace, hog_channel=hog_channel)
-    time_end = time.time()
-    print(round(time_end - time_start, 2), 'Seconds to extract HOG features...')
-    # Create an array stack of feature vectors
-    X = np.vstack((car_features, notcar_features)).astype(np.float64)
-    # Fit a per-column scaler
-    X_scaler = StandardScaler().fit(X)
-    # Apply the scaler to X
-    scaled_X = X_scaler.transform(X)
+#        print('Using:', HOG_ORIENTATIONS, 'orientations', HOG_CELL_SIZE, 'pixels (NxN) per cell and', HOG_CELLS_PER_BLOCK, 'cells per block')
+    for colorspace in [
+        'HLS',
+        'HSV',
+        'LAB',
+        'LUV',
+        'RGB',
+        'XYZ',
+        'YCrCb',
+        'YUV',
+        ]:
+        car_features = extract_hog_features(cars, cspace=colorspace)
+        notcar_features = extract_hog_features(not_cars, cspace=colorspace)
+        # Create an array stack of feature vectors
+        X = np.vstack((car_features, notcar_features)).astype(np.float64)
+        # Fit a per-column scaler
+        X_scaler = StandardScaler().fit(X)
+        # Apply the scaler to X
+        scaled_X = X_scaler.transform(X)
 
-    # Define the labels vector
-    y = np.hstack((np.ones(len(car_features)), np.zeros(len(notcar_features))))
-    del car_features
-    del notcar_features
-    gc.collect()
-
-
-    # Split up data into randomized training and test sets
-    rand_state = np.random.randint(0, 100)
-    X_train, X_test, y_train, y_test = train_test_split(
-        scaled_X, y, test_size=0.2, random_state=rand_state)
-
-    print('Using:', HOG_ORIENTATIONS, 'orientations', HOG_CELL_SIZE, 'pixels (NxN) per cell and', HOG_CELLS_PER_BLOCK, 'cells per block')
-    print('Feature vector length:', len(X_train[0]))
-    # Use a linear SVC
-    svc = LinearSVC()
-    # Check the training time for the SVC
-    time_start = time.time()
-    svc.fit(X_train, y_train)
-    time_end = time.time()
-    print(round(time_end - time_start, 2), 'Seconds to train SVC...')
-    # Check the score of the SVC
-    print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
-
-    # Save this, because we can
-    with open('svm.p', 'wb') as f:
-        pickle.dump(svc, f)
-
-    with open('svm.p', 'rb') as f:
-        svc = pickle.load(f)
+        # Define the labels vector
+        y = np.hstack((np.ones(len(car_features)), np.zeros(len(notcar_features))))
 
 
-    # Check the prediction time for a single sample
-    time_start = time.time()
-    n_predict = 10
-    print('    My SVC predicts: ', svc.predict(X_test[0:n_predict]))
-    print('For these',n_predict, 'labels: ', y_test[0:n_predict])
-    time_end = time.time()
-    time_delta = time_end - time_start
-    features_per_second = n_predict / time_delta
-    print(round(time_delta, 5), 'Seconds to predict', n_predict,'labels with SVC', round(features_per_second, 5), 'HOG features per second')
+        # Split up data into randomized training and test sets
+        rand_state = 4 # chosen by fair dice roll, guaranteed to be random
+        X_train, X_test, y_train, y_test = train_test_split(
+            scaled_X, y, test_size=0.2, random_state=rand_state)
+
+        # Use a linear SVC
+        svc = LinearSVC()
+        svc.fit(X_train, y_train)
+        predict = svc.predict(X_test)
+
+        # count false positives, negatives, exact matches
+        false_positives = np.zeros_like(predict)
+        false_positives[(predict == 1) & (y_test == 0)] = 1
+        pos_count = np.sum(false_positives)
+
+        false_negatives = np.zeros_like(predict)
+        false_negatives[(predict == 0) & (y_test == 1)] = 1
+        neg_count = np.sum(false_negatives)
+
+        matches = np.zeros_like(predict)
+        matches[predict == y_test] = 1
+        match_count = np.sum(matches)
+
+        print(colorspace,
+                'accuracy is', round(svc.score(X_test, y_test) * 100, 3),
+                ', false positives', pos_count,
+                ', false negatives', neg_count,
+                ', matches', match_count, 'out of', len(X_test)
+            )
+
+        # Save and reload to confirm it'll work IRL
+        with open('svm-{}.p'.format(colorspace), 'wb') as f:
+            pickle.dump(svc, f)
+
