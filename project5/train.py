@@ -25,10 +25,10 @@ if __name__ == '__main__':
     notcar_features = extract_hog_features(not_cars)
 
     # Create an array stack of feature vectors
-    X = np.vstack((car_features, notcar_features)).astype(np.float64)
+    X = np.concatenate((car_features, notcar_features), 0).astype(np.float64)
 
     # Define the labels vector
-    y = np.hstack((np.ones(len(car_features)), np.zeros(len(notcar_features))))
+    y = np.concatenate((np.ones(len(car_features)), np.zeros(len(notcar_features))), axis=0)
 
     # Split up data into randomized training and test sets
     rand_state = 4 # chosen by fair dice roll, guaranteed to be random
