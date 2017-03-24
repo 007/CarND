@@ -27,19 +27,13 @@ if __name__ == '__main__':
     # Create an array stack of feature vectors
     X = np.vstack((car_features, notcar_features)).astype(np.float64)
 
-    # Fit a per-column scaler
-    X_scaler = StandardScaler().fit(X)
-
-    # Apply the scaler to X
-    scaled_X = X_scaler.transform(X)
-
     # Define the labels vector
     y = np.hstack((np.ones(len(car_features)), np.zeros(len(notcar_features))))
 
     # Split up data into randomized training and test sets
     rand_state = 4 # chosen by fair dice roll, guaranteed to be random
     X_train, X_test, y_train, y_test = train_test_split(
-        scaled_X, y, test_size=0.2, random_state=rand_state)
+        X, y, test_size=0.2, random_state=rand_state)
 
     # Use a linear SVC
     svc = LinearSVC()

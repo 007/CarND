@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 import cv2
 from skimage.feature import hog
 
@@ -6,6 +7,9 @@ from skimage.feature import hog
 HOG_ORIENTATIONS = 18
 HOG_CELL_SIZE = 6
 HOG_CELLS_PER_BLOCK = 3
+
+with open('scaler.p', 'rb') as f:
+    scaler = pickle.load(f)
 
 def get_hog_features(img):
     features = hog( img,
@@ -25,5 +29,5 @@ def process_image_hog(img):
     hog_features = []
     for channel in range(feature_image.shape[2]):
         hog_features.append(get_hog_features(feature_image[:,:,channel]))
-    return np.ravel(hog_features)
+    return scaler.transform([np.ravel(hog_features)])[0]
 
