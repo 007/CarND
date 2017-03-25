@@ -10,6 +10,7 @@ from sklearn.preprocessing import StandardScaler
 HOG_ORIENTATIONS = 18
 HOG_CELL_SIZE = 6
 HOG_CELLS_PER_BLOCK = 3
+HOG_EXTRACTION_BLOCKS = (8, 8, 3, 3, 18)
 
 # we trained on 64x64 images, so we have to crop to that size
 IMAGE_BLOCK_SIZE = 64
@@ -42,14 +43,16 @@ def get_hog_features(img):
                     cells_per_block=(HOG_CELLS_PER_BLOCK, HOG_CELLS_PER_BLOCK),
                     transform_sqrt=True,
                     visualise=False,
-                    feature_vector=True
+                    feature_vector=False
                     )
     return features
+
 
 def process_image_hog(img):
     hog_features = []
     for channel in range(img.shape[2]):
         hog_features.append(get_hog_features(img[:,:,channel]))
+    return hog_features
     return scaler.transform([np.ravel(hog_features)])[0]
 
 def hog_sweep_image(img):
@@ -66,14 +69,21 @@ def hog_sweep_image(img):
 
     blocks = 0
     block_matches = []
-    for x in range(0, width - IMAGE_BLOCK_SIZE + 1, int(IMAGE_BLOCK_SIZE / 4)):
-        for y in range(0, height - IMAGE_BLOCK_SIZE + 1, int(IMAGE_BLOCK_SIZE / 4)):
-            image_block = im_crop[y:y+IMAGE_BLOCK_SIZE, x:x+IMAGE_BLOCK_SIZE,:]
-            features = process_image_hog(image_block)
-            if check_prediction([features]):
+    features = process_image_hog(im_crop)
+
+    steps_h, steps_w, _, _, _ = features[0].shape
+    hog_h, hog_w, _, _, _ = HOG_EXTRACTION_BLOCKS
+
+    for x in range(steps_w - hog_w):
+        for y in range(steps_h - hog_h):
+            feature_block = []
+            for channel in features:
+                feature_block.append(channel[y:y+hog_h,x:x+hog_w,:,:,:])
+            feature_block = scaler.transform([np.ravel(feature_block)])[0]
+            if check_prediction([feature_block]):
                 block_matches.append([
-                    (x, y + CROP_OFFSET),
-                    (x + IMAGE_BLOCK_SIZE, y + IMAGE_BLOCK_SIZE + CROP_OFFSET)
+                    (x * HOG_CELL_SIZE, (y * HOG_CELL_SIZE) + CROP_OFFSET),
+                    ((x + hog_w) * HOG_CELL_SIZE, (y + hog_h) * HOG_CELL_SIZE + CROP_OFFSET)
                 ])
 
     boxed = draw_boxes(img, block_matches)
