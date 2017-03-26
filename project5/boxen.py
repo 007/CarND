@@ -5,13 +5,15 @@ import pickle
 
 def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
     # Make a copy of the image
-    draw_img = np.copy(img)
+    draw_img = np.zeros_like(img)
     # Iterate through the bounding boxes
     for bbox in bboxes:
-        # Draw a rectangle given bbox coordinates
-        cv2.rectangle(draw_img, bbox[0], bbox[1], color, thick)
-    # Return the image copy with boxes drawn
-    return draw_img
+        x1, y1 = bbox[0]
+        x2, y2 =  bbox[1]
+        draw_img[y1:y2,x1:x2,0] = draw_img[y1:y2,x1:x2,0] + 1 # increment red channel
+
+    # Return the image copy with heatmap drawn
+    return cv2.addWeighted(img, 0.2, draw_img * 5, 1, 0)
 
 with open('boxen.p', 'rb') as f:
     box_list = pickle.load(f)
