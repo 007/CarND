@@ -15,6 +15,7 @@ HOG_EXTRACTION_BLOCKS = (8, 8, 3, 3, 18)
 # we trained on 64x64 images, so we have to crop to that size
 IMAGE_BLOCK_SIZE = 64
 
+GLOBAL_LIST = []
 with open('svm.p', 'rb') as f:
     svm = pickle.load(f)
 
@@ -24,6 +25,8 @@ def check_prediction(features):
     return False
 
 def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
+    global GLOBAL_LIST
+    GLOBAL_LIST.append(bboxes)
     # Make a copy of the image
     draw_img = np.copy(img)
     # Iterate through the bounding boxes
@@ -96,5 +99,9 @@ if __name__ == '__main__':
     out_vid = in_vid.fl_image(hog_sweep_image)
     out_vid.write_videofile('annotated_video.mp4', audio=False)
     from subprocess import call
-    call(['vlc', '--play-and-exit', 'annotated_video.mp4'])
+#    call(['vlc', '--play-and-exit', 'annotated_video.mp4'])
+    print(len(GLOBAL_LIST))
+    with open('boxen.p', 'wb') as f:
+        pickle.dump(GLOBAL_LIST, f)
+
 
