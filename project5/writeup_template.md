@@ -40,7 +40,7 @@ I started by reading in all the `vehicle` and `non-vehicle` images and [extracti
 
 #### 2. Explain how you settled on your final choice of HOG parameters.
 
-I started with the parameters proscribed in the class docs, and experimented from there to find better options. I read a [presentation](http://slideplayer.com/slide/5111258/) suggesting that a different set of parameters were useful for the same general problem solved in this project, so I implemented their choice of parameters. After that, I ran [a set of experiments](experiment.py) to see which other parameters I should change, specifically with regard to color space and the `C` parameter for SVM smoothness bounds. 
+I started with the parameters proscribed in the class docs, and experimented from there to find better options. I read a [presentation](http://slideplayer.com/slide/5111258/) suggesting that a different set of parameters were useful for the same general problem solved in this project, so I implemented their choice of parameters. After that, I ran [a set of experiments](experiment.py) to see which other parameters I should change, specifically with regard to color space and the `C` parameter for SVM smoothness bounds.
 
 ```
 HLS C = 1.0 accuracy is 98.592 , false positives 29.0 , false negatives 21.0 , matches 3502.0 out of 3552
@@ -93,6 +93,8 @@ The only surprising result was that there was **zero** difference for my choices
 
 The [SVM training code](train.py#L38-L54) is part of [`train.py`](train.py). It's really just the two lines 39 and 40 to implement and train, but the other supporting code is used to calculate false positive/negative counts based on the difference between the `predict` output from the SVM and the ground-truth labels from `y_test`. Each feature vector was approximately 30k, but the `scikit` `LinearSVC` code handled it exceptionally well.
 
+In the [final image detection code](vid.py), features are [extracted](vid.py#L83-L84) and [normalized](vid.py#L85) to match the requirement of the [saved SVM](vid.py#L19-L25).
+
 ### Sliding Window Search
 
 #### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
@@ -110,7 +112,7 @@ This is a second image where both vehicles are completely saturated with detecti
 
 ![alt text][bbox-saturated]
 
-This is a sample of the [heatmap](heatmap.py) that I generated from the overlap of bounding boxes as above. 
+This is a sample of the [heatmap](heatmap.py) that I generated from the overlap of bounding boxes as above.
 
 ![alt text][heatmap]
 
