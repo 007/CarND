@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import pickle
 
-def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
+def draw_heat(img, bboxes):
     # Make a copy of the image
     draw_img = np.zeros_like(img)
     # Iterate through the bounding boxes
@@ -20,8 +20,8 @@ with open('boxen.p', 'rb') as f:
 boxy = iter(box_list)
 
 def box_processor(img):
-    block_matches = next(boxy)
-    boxed = draw_boxes(img, block_matches)
+    boxes = next(boxy)
+    boxed = draw_heat(img, boxes)
     return boxed
 
 if __name__ == '__main__':
