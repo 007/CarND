@@ -126,7 +126,7 @@ Starting from the feature selection, I optimized my selection criteria for fewer
 ###  Video Implementation
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./annotated_video.mp4)
+Here's a [link to my video result](./annotated_video.mp4). The vehicles are indicated clearly and accurately most of the time, and there are a few brief false positives around road signs.
 
 
 #### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
@@ -143,11 +143,9 @@ False positives were filtered with [thresholding and history](bounding.py#L31-L3
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.
-
 The 2 biggest problems I faced were calculating the HOG feature sizes to be able to extract them from a single-pass version of the image, and suppressing false positives. It took a lot of debugging lines and re-reading the documentation for HOG to understand [what shape the feature blocks would end up](vid.py#L13). Getting the number of false positives down from crazy-alot to just a few was also quite difficult, and involved a lot of experimentation across the entire video to account for frame history and decay parameters.
 
-The pipeline, as implemented, is too slow for real-world use. The first thing to optimize would be the feature extraction code, primarily to see if fewer features would still give acceptable performance, but also to speed it up and make it run closer to real-time. Because of this limitation in my original implementation, I ended up breaking out several steps of the pipeline to their own files and duplicating some code. It helped with experimentation to be able to pickle and restore a previous step, but makes for a harder review - sorry about that!
+The pipeline, as implemented, is too slow for real-world use. The first thing to optimize would be the feature extraction code, primarily to see if fewer features would still give acceptable performance, but also to speed it up and make it run closer to real-time. Because of this limitation in my original implementation, I ended up breaking out several steps of the pipeline to their own files and duplicating some code. It helped with experimentation to be able to `pickle` and store one step and pick up from there with an entirely new file, but may make it harder to review - sorry about that!
 
 Adding more (or better) history tracking would probably help to reduce false positives, and averaging or other weighting might help to reduce false negatives. The bounding box code only takes into account the thresholded / time-tracked features, so it doesn't track and box vehicles directly, only their "shadows" over time. I would like to add image segmentation around the vehicle detection to make a better show of the detection - something like converting the image to grayscale but allowing the detected vehicles to show up in color.
 
